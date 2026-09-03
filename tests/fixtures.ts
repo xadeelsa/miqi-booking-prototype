@@ -2,12 +2,10 @@ import { db } from "@/lib/db";
 import type { BookingInput } from "@/lib/validation";
 
 /**
- * Tests run against a real Postgres, which on a developer's machine is very
- * likely the same database they have been clicking through by hand. So
- * fixtures are confined to windows the seed never touches - availability
- * beyond 2098, history before 2000, and service slugs carrying a reserved
- * prefix - and cleared *before* each test rather than after, so a run that
- * crashes half way through can't poison the next one.
+ * The test database is usually the one the developer has been clicking through,
+ * so fixtures stay in windows the seed never touches: slots beyond 2098,
+ * history before 2000, and a reserved service-slug prefix. Cleared *before*
+ * each test, so a run that crashes half way through can't poison the next one.
  */
 
 export const FIXTURE_EPOCH = new Date("2098-01-01T00:00:00Z");
@@ -42,10 +40,7 @@ export async function resetFixtures(): Promise<void> {
   });
 }
 
-/**
- * Active, because `loadBookingContext` only resolves active services - and
- * removed again by `resetFixtures`, so it never shows up in the real funnel.
- */
+/** Active, because `loadBookingContext` only resolves active services. */
 export function createFixtureService(priceCents = 4500) {
   return db.service.create({
     data: {

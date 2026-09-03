@@ -2,7 +2,7 @@
 
 I planned this app with **Claude Code** before writing any of it. I followed a normal SDLC rather than jumping straight to code.
 
-Scope first: a parent-facing booking funnel, with payment, email and calendar mocked, on made-up data. Then the technical approach: one Next.js app, Postgres, and the unique constraint as the double-booking guarantee. Then an order to build it in, so each commit left something that worked - data model, read steps, write path, payment, confirmation, admin, tests, docs. The concurrency test was planned alongside the booking write, so the mechanism and the proof of it landed together rather than the proof arriving weeks later.
+Scope first: a parent-facing booking funnel, with payment, email and calendar mocked, on made-up data. Then the technical approach: one Next.js app, Postgres, and the unique constraint as the double-booking guarantee. Then an order to build it in, so each commit left something that worked: data model, read steps, write path, payment, confirmation, admin, tests, docs. The concurrency test was planned alongside the booking write, so the mechanism and the proof of it landed together rather than the proof arriving weeks later.
 
 I also used AI to exercise the flow: a successful booking, a declined payment, a slot that was already taken, and the automated suite against Postgres.
 

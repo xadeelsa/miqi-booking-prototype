@@ -1,9 +1,6 @@
-// Single source of truth for the (fictitious) selection options a parent picks
-// during booking: school level, year, and subject. These are CAPTURED on a
-// booking, not stored as database tables - so they live here as constants.
-//
-// This module only describes what exists. Deciding whether an incoming
-// combination is valid is src/lib/validation.ts's job.
+// The options a parent picks: school level, year, subject. Captured on a
+// booking rather than stored as tables, so they live here as constants.
+// src/lib/validation.ts decides whether an incoming combination is valid.
 
 export const SCHOOL_LEVELS = [
   "BASISSCHOOL",

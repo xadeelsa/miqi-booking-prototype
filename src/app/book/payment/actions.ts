@@ -22,12 +22,8 @@ export type PaymentState = {
 };
 
 /**
- * Charge, then book - the order create-on-pay demands.
- *
- * The selection is a bound (encrypted) action argument rather than hidden
- * inputs, since this page has nothing editable on it, and it still goes back
- * through the schema with the details because a Booking row needs them as one
- * object.
+ * Charge, then write the row. The selection arrives as a bound action argument
+ * and is still re-validated, because a Booking row needs it with the details.
  */
 export async function payAndBook(
   selection: BookingSelection,
@@ -55,26 +51,20 @@ export async function payAndBook(
 
   const payment = await chargeCard(outcome.data);
   if (!payment.paid) {
-    // A decline writes nothing at all. That is the whole point of
-    // create-on-pay: the slot is still free, for this parent to retry or for
-    // anyone else to take. It also means a Booking row only ever exists in the
-    // PAID state, so PaymentStatus.PENDING and FAILED are currently
-    // unreachable - recording attempts would need a separate table that
-    // doesn't hold a slot (noted in the README's limitations).
+    // A decline writes nothing, so the slot stays free. It also means a row
+    // only ever exists as PAID, leaving PENDING and FAILED unreachable
+    // (README limitations).
     return { error: payment.message };
   }
 
   const result = await createBooking(input.data);
   if (!result.ok) {
-    // Paid, but lost the slot in the gap between charging and inserting. The
-    // simulated charge is instant so the window is nil here, but against a
-    // real provider this is the branch that has to void or refund before
-    // reporting back - the one cost of charging before writing.
+    // Paid, but lost the slot. Against a real provider this is the branch
+    // that has to void or refund before reporting back.
     return { error: UNAVAILABLE_MESSAGES[result.reason] };
   }
 
-  // Dropped before the redirect, so the contact details don't outlive the
-  // funnel - from here on the Booking row is the record.
+  // The Booking row is the record from here on.
   await clearDetailsDraft();
 
   await sendConfirmationEmail(result.reference);
@@ -82,12 +72,7 @@ export async function payAndBook(
   redirect(confirmationHref(result.reference));
 }
 
-/**
- * Best effort, and deliberately after the booking is safely stored: the
- * session is paid for either way, so a mail failure must not present itself
- * as a failed booking. Awaiting it inline keeps the prototype's log readable;
- * a real system would hand this to a queue with retries.
- */
+/** After the row is stored: a mail failure must not look like a failed booking. */
 async function sendConfirmationEmail(reference: string): Promise<void> {
   try {
     const booking = await getBookingByReference(reference);

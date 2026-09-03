@@ -1,10 +1,10 @@
 # Architecture
 
-Short overview of how the booking prototype is put together.
+How the booking prototype is put together. Setup and limitations are in [README.md](./README.md).
 
 ## Shape
 
-One Next.js App Router app. Pages render on the server, mutations go through server actions, Postgres is reached via Prisma. There's no API layer; the only route handler in the app serves the `.ics` file, because a download isn't a page.
+One Next.js App Router application. Pages render on the server, mutations go through server actions, and Prisma talks to Postgres. There is no API tier; the only route handler serves the `.ics` download.
 
 ```
 Browser
@@ -23,44 +23,44 @@ Postgres
   Booking.slotId is UNIQUE
 ```
 
-`src/lib/booking.ts` is the domain. It doesn't import `next/headers`, so the tests can call `createBooking` directly, and it could sit behind an HTTP API later without being rewritten.
+`src/lib/booking.ts` is the domain. It doesn't import `next/headers`, so the tests call `createBooking` directly, and it could sit behind an HTTP API later without being rewritten.
 
 ## Funnel
 
-1. **Service** - `/book` lists active services from the database.
-2. **Level** - `/book/level` captures school level, year and subject from `src/lib/catalog.ts`. Those fields are stored on the booking. They don't change which times you see.
-3. **Time** - `/book/slots` lists future slots with no booking attached.
-4. **Details** - form posts to `saveDetails`, which validates, re-checks the slot, and writes an httpOnly cookie.
-5. **Review** - server component reads the cookie and prices from the `Service` row.
-6. **Payment** - `payAndBook` charges, then inserts. Decline writes nothing. Success creates a `PAID` row.
-7. **Confirmation** - `/book/confirmation/[reference]`. Email is logged (not sent). Calendar is a Google link plus an `.ics` download, both built from the stored booking.
+1. **Service.** `/book` lists the active services from the database.
+2. **Level.** `/book/level` collects school level, year and subject from `src/lib/catalog.ts`. These are recorded on the booking; they don't affect which hours are free.
+3. **Time.** `/book/slots` shows future slots that nobody has booked.
+4. **Details.** `saveDetails` validates the form, re-checks that the slot is still there, and puts the contact details in an httpOnly cookie.
+5. **Review.** A Server Component reads the cookie and prices the session from the `Service` row.
+6. **Payment.** `payAndBook` charges first. A decline writes nothing; a success inserts a `PAID` booking.
+7. **Confirmation.** `/book/confirmation/[reference]` shows the booking with a Google Calendar link and an `.ics` download, both built from the stored row.
 
-From details onward, every page runs the same preamble through `resolveFunnelStep`: re-parse the query string, reload the service and slot, re-price, and pick up the contact details. So if the time goes while a parent is filling in the form, they get a normal "that time is gone" message, not a 500. The contact details come back nullable rather than guaranteed, which is what stops a later step using them without deciding what to do when they're missing.
+From the details step onward, `resolveFunnelStep` runs first on every page load. It parses the query string, re-fetches the service and slot, re-prices, and reloads the cookie. A parent whose slot went while they were typing gets the ordinary "slot taken" screen rather than an error. `details` comes back nullable, so a page cannot use it without first deciding what to do when it's missing.
 
-Selection lives in the URL so refresh works and pages stay server-rendered. Names, email and phone stay in the cookie so they don't leak into history or logs. The price is never in the request.
+The selection lives in the URL, which keeps every step refreshable and server-rendered. Contact details do not, because a name, an email and a phone number in a query string end up in browser history, `Referer` headers and access logs. The price is in neither. It is read from the `Service` row every time it is needed.
 
 ## Double-booking
 
-Checking availability is a read. Any read-then-write leaves a gap, so the application does not try to win that race.
+`Booking.slotId` is UNIQUE, and that constraint is the entire guarantee.
 
-`Booking.slotId` is unique. Two rows for the same hour cannot be stored. `createBooking` treats a unique-constraint violation on `slotId` as `{ ok: false, reason: "taken" }` - an expected outcome, not an exception. A collision on the reference code is retried with a new code.
+Availability is checked before every write, but a check and an insert are two separate statements, so two parents can both pass the check for the same hour. Nothing closes that window. A hold would only move the problem, since a hold is itself a row somebody has to expire. So the write is allowed to race, and Postgres refuses the second one.
 
-`tests/double-booking.test.ts` fires ten inserts at the same slot against real Postgres. Exactly one succeeds. A second test books twenty different slots at once and expects all twenty, because a constraint that rejected everything after the first booking would pass the first test just as happily.
+`createBooking` treats that refusal as an expected outcome rather than an exception. A `slotId` violation returns `{ ok: false, reason: "taken" }` and the caller shows the slot-taken screen. A collision on the reference code is different: nothing is wrong with the booking, so it retries with a new code.
 
-There are no holds. A booking row exists only after payment. Abandoned forms don't occupy slots. The cost is that two people can reach Pay for the same time; the constraint decides.
+`tests/double-booking.test.ts` fires ten concurrent bookings at one slot against real Postgres and asserts that exactly one wins and the other nine come back with a reason. A second test books twenty different slots concurrently and asserts all twenty succeed, which catches the opposite failure: a constraint that rejected everything would pass the first test just as well.
 
 ## Integrations
 
-Payment, email and calendar are local functions with the shape of a real vendor, not the vendor itself.
+Payment, email and calendar are local functions shaped like the real thing.
 
-- `chargeCard` takes success or failure as an argument, so a decline is demonstrable on purpose.
-- `sendEmail` logs the message. The request looks like Resend's `emails.send`.
-- Calendar is a Google Calendar template URL and an RFC 5545 `.ics` file.
+- `chargeCard` takes the outcome as an argument, so the decline path is repeatable rather than random.
+- `sendEmail` mirrors `resend.emails.send` and writes the message to the server log.
+- The calendar hand-off is a Google Calendar template URL and an RFC 5545 `.ics` file, both generated from the stored booking.
 
-A declined charge writes nothing. Mail is sent after the row is committed; if it fails, the booking still stands.
+A declined charge writes nothing. The email goes out after the row is committed, so a mail failure leaves the booking intact.
 
 ## Admin
 
-`/admin` lists every booking, split into upcoming and past, with a running total. It is unauthenticated in this prototype. The page is `force-dynamic` so it never serves a cached snapshot.
+`/admin` lists every booking, split into upcoming and past with a count. There is no login. The page is `force-dynamic`, because a booking list is worth nothing if it is a snapshot from build time.
 
-The upcoming-versus-past split sits in `src/lib/admin.ts` rather than in the page. Reading the clock during render is the kind of impurity a component shouldn't have, and moving it out made the boundary injectable, so "a session starting this instant counts as upcoming" is a test rather than a hope.
+The split lives in `src/lib/admin.ts` rather than in the component, and takes `now` as an argument. One clock read means both halves are measured against the same instant, and a session starting this second lands in exactly one of them. It also makes the boundary testable, which is how `tests/happy-path.test.ts` pins it down.

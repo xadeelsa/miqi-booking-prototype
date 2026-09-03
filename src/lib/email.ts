@@ -1,15 +1,8 @@
 import { randomUUID } from "node:crypto";
 
 /**
- * Mock mailer, shaped like Resend on purpose.
- *
- * The request and response mirror `resend.emails.send` - `to` as an array,
- * `html`/`text` alongside each other, and a `{ data, error }` envelope rather
- * than a thrown exception. Swapping the mock for the real client is then an
- * import and an API key, not a refactor of every caller.
- *
- * Nothing is delivered: it writes the message to the server log so the
- * contents can be inspected while clicking through the funnel.
+ * Mock mailer, shaped like `resend.emails.send` so the real client can drop in.
+ * Nothing is delivered; the message goes to the server log.
  */
 
 export type SendEmailRequest = {

@@ -3,14 +3,9 @@ import { getBookingByReference } from "@/lib/queries";
 import { parseReference } from "@/lib/validation";
 
 /**
- * The .ics download, served from a child segment of the confirmation page so
- * the same reference gates both.
- *
- * Plain 404 responses rather than `notFound()`: this is a file endpoint, and a
- * download that fails should say so in the status code instead of returning an
- * HTML error page with a 404 attached. A malformed reference gets the same
- * answer as an unknown one, so the URL can't be used to probe which codes
- * exist.
+ * Plain 404s rather than `notFound()`, because a failed download should not
+ * return an HTML error page. A malformed reference answers like an unknown
+ * one, so the URL can't be used to probe which codes exist.
  */
 export async function GET(
   _request: Request,

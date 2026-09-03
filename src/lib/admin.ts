@@ -10,11 +10,8 @@ export type AdminOverview = {
 };
 
 /**
- * Splits the booking list around "now" and totals it.
- *
- * `now` is injectable for that reason. One clock read, so both halves are
- * measured against the same instant and a session starting this second can't
- * land in neither list.
+ * Splits the booking list around `now`, read once so a session starting this
+ * instant lands in exactly one half.
  */
 export async function loadAdminOverview(
   now: Date = new Date(),
@@ -32,9 +29,7 @@ export function summariseBookings(
   return {
     total: bookings.length,
     upcoming: bookings.filter((b) => b.slot.startsAt.getTime() >= instant),
-    // Reversed so the most recent session is first. The query orders
-    // ascending, which is what the upcoming list wants and the past one
-    // doesn't.
+    // The query orders ascending, which the past list wants reversed.
     past: bookings
       .filter((b) => b.slot.startsAt.getTime() < instant)
       .reverse(),

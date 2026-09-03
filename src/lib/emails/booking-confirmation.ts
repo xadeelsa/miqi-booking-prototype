@@ -4,34 +4,20 @@ import { SCHOOL_LEVEL_LABELS } from "../catalog";
 import { EMAIL_FROM, type SendEmailRequest } from "../email";
 import { formatDateTime, formatPrice } from "../format";
 
-/**
- * Built from the stored Booking rather than from the funnel's state, so what
- * a parent is told matches what was actually recorded - including the price,
- * which is the snapshot taken at booking time.
- *
- * Structural type rather than Prisma's, so this stays testable without a
- * database and doesn't care which query loaded the booking. It extends the
- * calendar's shape because the email carries the same two hand-off links.
- */
+/** Built from the stored Booking, so the email matches what was recorded. */
 export type ConfirmationBooking = CalendarBooking & {
   parentName: string;
   parentEmail: string;
   priceCents: number;
 };
 
-/**
- * Emails can't use relative URLs. Defaults to the dev server so the logged
- * message is clickable without any configuration.
- */
+/** Emails can't use relative URLs. Defaults to the dev server. */
 const APP_URL = (process.env.APP_URL ?? "http://localhost:3000").replace(
   /\/+$/,
   "",
 );
 
-/**
- * Names and subjects are parent-supplied, and the HTML body is assembled by
- * hand rather than by JSX, so nothing escapes them for us.
- */
+/** Parent-supplied text in hand-assembled HTML, so nothing escapes it for us. */
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")

@@ -41,8 +41,7 @@ export default async function ReviewPage({
 
   const { selection, service, slot, priceCents, details } = step;
 
-  // No draft means a direct link or an expired cookie - send the parent to the
-  // form rather than showing half a summary.
+  // No draft means a direct link or an expired cookie.
   if (!details) redirect(detailsHref(selection));
 
   return (
@@ -75,8 +74,6 @@ export default async function ReviewPage({
         </dl>
       </Card>
 
-      {/* Plain navigation: nothing is written until the payment succeeds, and
-          the payment step re-validates everything on arrival anyway. */}
       <Link
         href={paymentHref(selection)}
         className={buttonClass("primary", "mt-6")}

@@ -7,11 +7,7 @@ import { formatPrice } from "@/lib/format";
 
 const INITIAL: PaymentState = {};
 
-/**
- * Two submit buttons in one form, distinguished by their `value` - the
- * clicked button's value is what reaches the action, so the decline path is
- * reachable without a radio group nobody would use.
- */
+/** Two submit buttons in one form; the clicked one's `value` reaches the action. */
 export function PaymentForm({
   action,
   priceCents,
@@ -19,8 +15,7 @@ export function PaymentForm({
   action: (state: PaymentState, formData: FormData) => Promise<PaymentState>;
   priceCents: number;
 }) {
-  // A successful payment redirects to the confirmation page, so the only
-  // state this form ever renders is a decline.
+  // Success redirects, so a decline is the only state this renders.
   const [state, formAction, pending] = useActionState(action, INITIAL);
 
   return (

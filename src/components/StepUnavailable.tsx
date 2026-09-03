@@ -4,10 +4,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { UNAVAILABLE_MESSAGES, type UnavailableReason } from "@/lib/booking";
 
 /**
- * What every step shows when the chosen slot or service stopped being
- * bookable underneath the parent. Not an error page - the funnel is intact,
- * one specific choice just expired, so it keeps the stepper and offers the way
- * back rather than dead-ending.
+ * Shown when the chosen slot or service stopped being bookable. Not an error
+ * page: the funnel is intact, one choice expired.
  */
 export function StepUnavailable({
   title,

@@ -11,13 +11,7 @@ import { formatDateTime, formatPrice } from "@/lib/format";
 import { getBookingByReference } from "@/lib/queries";
 import { parseReference } from "@/lib/validation";
 
-/**
- * Reached by reference, which means the reference behaves as a bearer token:
- * anyone holding it can see the booking. That is the usual pattern for a
- * guest checkout and it is why the reference is random rather than sequential,
- * but 24 million codes is not a lot. In production this would sit behind a
- * signed link from the confirmation email, or an account (README limitations).
- */
+/** The reference acts as a bearer token here. See README limitations. */
 function Row({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex justify-between gap-6 py-3 first:pt-0 last:pb-0">
@@ -92,8 +86,6 @@ export default async function ConfirmationPage({
           Add it to your calendar
         </h2>
         <div className="mt-3 flex flex-wrap gap-3">
-          {/* Both leave the app, so neither is a <Link>: the Google URL is
-              external, and the .ics is a download rather than a navigation. */}
           <a
             href={googleCalendarUrl(booking)}
             target="_blank"

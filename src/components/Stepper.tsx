@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 const STEPS = [
   "Service",
@@ -11,8 +11,6 @@ const STEPS = [
   "Review",
   "Payment",
 ] as const;
-
-const PROGRESS_KEY = "miqi-stepper-progress";
 
 function stepFromPath(pathname: string): number | null {
   if (pathname.startsWith("/book/confirmation")) return null;
@@ -25,41 +23,21 @@ function stepFromPath(pathname: string): number | null {
   return null;
 }
 
-function readStoredProgress(): number | null {
-  try {
-    const raw = sessionStorage.getItem(PROGRESS_KEY);
-    if (raw == null) return null;
-    const value = Number(raw);
-    return Number.isFinite(value) ? value : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeStoredProgress(value: number) {
-  try {
-    sessionStorage.setItem(PROGRESS_KEY, String(value));
-  } catch {
-    // Private mode can block sessionStorage; the bar still works, just snaps.
-  }
+function fillFor(step: number): number {
+  return (step - 1) / (STEPS.length - 1);
 }
 
 export function Stepper() {
   const pathname = usePathname();
   const current = stepFromPath(pathname);
-  const target = current == null ? 0 : (current - 1) / (STEPS.length - 1);
+  const target = current == null ? 0 : fillFor(current);
 
-  const [fill, setFill] = useState(target);
+  // A fresh mount starts a step back so the effect below has something to
+  // animate. A client-side navigation keeps its state and moves from there.
+  const [fill, setFill] = useState(
+    current == null ? 0 : fillFor(Math.max(1, current - 1)),
+  );
   const [animate, setAnimate] = useState(false);
-
-  // If this instance remounted (native form submit, refresh), start at the
-  // previous fill so the upcoming transition has somewhere to go from.
-  useLayoutEffect(() => {
-    const stored = readStoredProgress();
-    if (stored != null && Math.abs(stored - target) > 0.001) {
-      setFill(stored);
-    }
-  }, []);
 
   useEffect(() => {
     if (current == null) return;
@@ -67,7 +45,6 @@ export function Stepper() {
     const id = requestAnimationFrame(() => {
       setAnimate(true);
       setFill(target);
-      writeStoredProgress(target);
     });
     return () => cancelAnimationFrame(id);
   }, [current, target]);

@@ -25,9 +25,8 @@ const services = [
   },
 ];
 
-// A couple of example bookings so a fresh clone has something to look at:
-// /admin is populated immediately, and these slots visibly disappear from the
-// available list. The anti-double-booking guarantee demonstrating itself.
+// Example bookings so a fresh clone has something on /admin and a few slots
+// already taken.
 const exampleBookings: {
   reference: string;
   serviceSlug: string;

@@ -12,8 +12,7 @@ export default async function ChooseSlotPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  // Server-side validation of every incoming parameter. The dropdowns on the
-  // previous step are UX only - this is the gate.
+  // The dropdowns on the previous step are UX only. This is the gate.
   const selection = parseSelection(await searchParams);
   if (!selection) notFound();
 

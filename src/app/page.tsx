@@ -45,7 +45,7 @@ export default function HomePage() {
         </ul>
 
         <p className="mt-8 text-xs text-muted">
-          This is a prototype using fictitious data. You can also view the{" "}
+          This is a prototype using mock data. You can also view the{" "}
           <Link href="/admin" className="font-medium text-brand hover:text-brand-strong">
             admin overview
           </Link>

@@ -13,10 +13,7 @@ import {
   type SchoolLevel,
 } from "@/lib/catalog";
 
-/**
- * Client component only because the year/subject options depend on the chosen
- * level. 
- */
+/** Client component because the year and subject options depend on the level. */
 export function LevelPicker({ serviceSlug }: { serviceSlug: string }) {
   const [level, setLevel] = useState<SchoolLevel | "">("");
 

@@ -3,13 +3,9 @@ import { SCHOOL_LEVELS, SUBJECTS_BY_LEVEL, YEARS_BY_LEVEL } from "./catalog";
 import { REFERENCE_PATTERN } from "./reference";
 
 /**
- * The server boundary. Anything that arrives from a URL or a form comes
- * through here first, so the funnel pages and the server actions agree on what
- * a valid booking looks like instead of each re-deriving it.
- *
- * Nothing on the client is trusted, including the level/year/subject options
- * the pickers offered — the `<select>`s exist for usability, these schemas
- * decide what is real.
+ * The server boundary. Everything from a URL or a form is parsed here, and
+ * nothing the client sent is trusted, including the options the pickers
+ * offered.
  */
 
 const selectionShape = {
@@ -50,11 +46,7 @@ const detailsShape = {
     .optional(),
 };
 
-/**
- * year and subject are only meaningful relative to level, which is why they
- * can't be validated field-by-field. Zod skips refinements when the base
- * object already failed, so these issues surface once the shape is sound.
- */
+/** year and subject are only valid relative to level, so this is a refinement. */
 const checkCatalog: z.core.CheckFn<{
   level: (typeof SCHOOL_LEVELS)[number];
   year: string;
@@ -86,7 +78,7 @@ export const bookingSelectionSchema = z
   .object({ ...selectionShape, ...slotShape })
   .check(checkCatalog);
 
-/** The details form on its own — also used to vet the draft cookie. */
+/** The details form on its own, also used to vet the draft cookie. */
 export const detailsSchema = z.object(detailsShape);
 
 /** Everything needed to write a Booking, minus the server-computed price. */
@@ -94,20 +86,12 @@ export const bookingInputSchema = z
   .object({ ...selectionShape, ...slotShape, ...detailsShape })
   .check(checkCatalog);
 
-/**
- * Which branch of the simulated payment to take. It arrives from a form, so
- * it is validated like any other input even though only the prototype's own
- * buttons ever set it.
- */
+/** Which branch of the simulated payment to take. */
 export const paymentOutcomeSchema = z.enum(["success", "failure"]);
 
 export type PaymentOutcome = z.infer<typeof paymentOutcomeSchema>;
 
-/**
- * A booking reference out of a URL. Uppercased first, so a parent who types
- * theirs in lower case still lands on their booking, and shape-checked before
- * it ever reaches a query.
- */
+/** A reference out of a URL, uppercased so lower-case typing still resolves. */
 export const referenceSchema = z
   .string()
   .trim()
@@ -133,11 +117,7 @@ export const DETAIL_FIELDS = [
 
 export type DetailField = (typeof DETAIL_FIELDS)[number];
 
-/**
- * First message per field, which is all a form can usefully show. Zod's own
- * `flattenError` keeps every issue per key and drops nested paths; this shape
- * maps straight onto `<Field error>`.
- */
+/** First message per field, which is all `<Field error>` can show. */
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   const errors: Record<string, string> = {};
   for (const issue of error.issues) {
@@ -147,7 +127,7 @@ export function fieldErrors(error: z.ZodError): Record<string, string> {
   return errors;
 }
 
-/** `null` means "this was never a real booking" — callers 404. */
+/** `null` means "this was never a real booking", so callers 404. */
 export function parseSelection(input: unknown): Selection | null {
   const result = selectionSchema.safeParse(input);
   return result.success ? result.data : null;

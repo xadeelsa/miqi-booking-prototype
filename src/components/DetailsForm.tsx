@@ -10,10 +10,8 @@ import type { BookingDetails, BookingSelection } from "@/lib/validation";
 const INITIAL: DetailsFormState = {};
 
 /**
- * Client component only so the parent gets validation errors back without
- * losing what they typed. The selection travels in hidden inputs and is
- * re-validated server-side - these fields are a convenience, not a source of
- * truth.
+ * Client component so validation errors come back without losing what the
+ * parent typed.
  */
 export function DetailsForm({
   selection,

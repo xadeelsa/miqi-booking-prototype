@@ -4,7 +4,7 @@ Prototype booking flow for **MIQI Huiswerkbegeleiding**. A parent chooses a serv
 
 It's one Next.js app talking to Postgres. The data is made up. Payment, email and calendar are mocked, nothing is charged and nothing is actually sent.
 
-You can walk the full funnel today: service → level → time → details → review → payment → confirmation. There's also an [admin bookings list](http://localhost:3000/admin) (no login in this prototype).
+You can walk the full funnel today: service → level → time → details → review → payment → confirmation. There's also an admin bookings list at `/admin` (no login in this prototype).
 
 How it's put together: [ARCHITECTURE.md](./ARCHITECTURE.md). How I used AI: [AI.md](./AI.md).
 
@@ -95,7 +95,7 @@ I kept this as **one Next.js app** instead of Laravel with a separate frontend, 
 
 **Most of the funnel is in the query string** (service, level, year, subject, slot). Refreshing a step works, and the pages stay server-rendered. Names, email and phone go in an httpOnly cookie instead, putting those in the URL would leak them into history, `Referer` headers and logs. Zod checks everything that hits the server, including values the dropdowns offered.
 
-**Tests run against real Postgres.** The thing we're proving is a unique constraint. Mocking Prisma would only prove the mock. Green tests aren't proof either, so the ones that matter were checked by breaking the code on purpose and making sure they went red.
+**Tests run against real Postgres.** The thing we're proving is a unique constraint. Mocking Prisma would only prove the mock.
 
 The UI is Tailwind. Payment is a fake charge with Mollie/Stripe in mind (iDEAL, given a Dutch customer base). Email is shaped like Resend's `emails.send`, so replacing the mock should be an import and an API key, not a rewrite.
 

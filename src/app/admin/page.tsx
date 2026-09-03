@@ -7,11 +7,7 @@ import { SCHOOL_LEVEL_LABELS } from "@/lib/catalog";
 import { formatDateTime, formatPrice } from "@/lib/format";
 import type { getBookingsForAdmin } from "@/lib/queries";
 
-/**
- * A booking list is never allowed to be a snapshot from build time - it is
- * the one page whose entire value is being current. Nothing else in the app
- * declares this yet, which is worth a look before any production deploy.
- */
+// A stale booking list is worse than no booking list.
 export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Bookings - MIQI admin" };

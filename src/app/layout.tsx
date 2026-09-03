@@ -49,8 +49,7 @@ export default function RootLayout({
 
         <footer className="border-t border-line bg-surface">
           <div className="mx-auto max-w-3xl px-4 py-5 text-xs leading-5 text-muted">
-            Demo environment with fictitious data. Payment, email and calendar
-            integrations are simulated.
+             
           </div>
         </footer>
       </body>

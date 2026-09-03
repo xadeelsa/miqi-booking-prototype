@@ -2,9 +2,8 @@ import type { ReactNode } from "react";
 import { cx } from "./styles";
 
 /**
- * Wraps the control in its `<label>`, so the two are associated natively - no
- * id/htmlFor pair to keep in sync. `error` sits inside the label too, which is
- * why it needs no aria-describedby.
+ * The control sits inside its `<label>`, so there is no id/htmlFor pair to keep
+ * in sync and `error` needs no aria-describedby.
  */
 export function Field({
   label,

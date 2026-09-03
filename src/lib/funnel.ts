@@ -11,19 +11,9 @@ import {
 } from "./validation";
 
 /**
- * The preamble every step after slot selection needs: validate the query
- * string, resolve it against the database, price it, and pick up the contact
- * details if the parent has entered them.
- *
- * It lives apart from `booking.ts` on purpose. Reading the draft touches
- * `next/headers`, and pulling that into the booking domain would drag a
- * request context into `createBooking` - which is a plain database function
- * that the tests import directly.
- *
- * `details` is deliberately nullable rather than enforced here: the details
- * step is where they get entered, and the later steps refuse to continue
- * without them. Leaving it in the type means a page cannot use the details
- * without first deciding what to do when they are missing.
+ * Validates the query string, resolves it against the database, prices it and
+ * reads the draft cookie. Separate from `booking.ts` because this touches
+ * `next/headers`, which would drag a request context into `createBooking`.
  */
 export type FunnelStep =
   | { status: "invalid" }

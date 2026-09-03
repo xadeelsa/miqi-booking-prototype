@@ -1,4 +1,4 @@
-/** Bits shared by more than one primitive. Everything else lives with its component. */
+/** Shared by more than one primitive. */
 
 export const cx = (...parts: (string | false | null | undefined)[]) =>
   parts.filter(Boolean).join(" ");

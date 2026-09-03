@@ -9,7 +9,7 @@ export type UnavailableReason = "service" | "slot" | "taken" | "past";
 export const UNAVAILABLE_MESSAGES: Record<UnavailableReason, string> = {
   service: "That service is no longer offered.",
   slot: "That time is no longer in our schedule.",
-  taken: "Sorry — someone else just booked that time.",
+  taken: "Sorry, someone else just booked that time.",
   past: "That time has already passed.",
 };
 
@@ -23,16 +23,8 @@ export type BookingContext =
   | { ok: false; reason: UnavailableReason };
 
 /**
- * Resolves a selection into the real records and prices it.
- *
- * The price is deliberately *not* carried through the funnel. The URL never
- * holds an amount, so there is nothing for a parent to edit, and the details
- * page, the review page and the booking write all price through this one
- * function — what is shown and what is charged cannot drift apart.
- *
- * Availability is re-checked on every call rather than once at slot selection,
- * because a parent can sit on the details form for a while. This narrows the
- * race window but cannot close it — see `createBooking`.
+ * Resolves a selection into the real records and prices it from the Service
+ * row. The price never travels through the funnel, so it cannot be edited.
  */
 export async function loadBookingContext(
   selection: BookingSelection,
@@ -47,8 +39,6 @@ export async function loadBookingContext(
   if (slot.booking) return { ok: false, reason: "taken" };
   if (slot.startsAt.getTime() <= Date.now()) return { ok: false, reason: "past" };
 
-  // One session at the service's list price. Real pricing would vary by level
-  // or bundle size; MIQI's prototype rate is flat per service.
   return { ok: true, service, slot, priceCents: service.priceCents };
 }
 
@@ -59,16 +49,7 @@ export type CreateBookingResult =
 /** How many fresh references to try before giving up. */
 const REFERENCE_ATTEMPTS = 5;
 
-/**
- * Writes the Booking. Call this once payment has succeeded, not before.
- *
- * **Create-on-pay.** No row exists for a slot until someone has actually paid
- * for it. Nothing is reserved while a parent fills in the form, which means
- * there is no held/expired state to model, no TTL, and no scheduled job
- * sweeping up abandoned holds. The cost is that two parents can both reach the
- * pay button for the same slot; the benefit is that a slot is never silently
- * unavailable because somebody wandered off mid-funnel.
- */
+/** Writes the Booking. Call this after payment has succeeded, not before. */
 export async function createBooking(
   input: BookingInput,
 ): Promise<CreateBookingResult> {
@@ -103,13 +84,11 @@ export async function createBooking(
       };
     } catch (error) {
       switch (uniqueConflictField(error)) {
-        // Another parent's insert committed first. The guarantee working as
-        // designed, so the caller gets a reason rather than an exception.
+        // Another parent's insert committed first.
         case "slotId":
           return { ok: false, reason: "taken" };
 
-        // Two references collided. Nothing is wrong with the booking itself,
-        // so try again with a new code.
+        // Reference collision, not a booking problem. Retry with a new code.
         case "reference":
           continue;
 
@@ -161,15 +140,11 @@ export function paymentHref(selection: BookingSelection): string {
   return `/book/payment?${selectionQuery(selection)}`;
 }
 
-/**
- * The end of the funnel. Keyed by reference rather than by row id so the URL
- * is the thing the parent already has in their email.
- */
+/** Keyed by reference, which is what the parent has in their email. */
 export function confirmationHref(reference: string): string {
   return `/book/confirmation/${encodeURIComponent(reference)}`;
 }
 
-/** Sits under the confirmation page so both are gated by the same reference. */
 export function icsHref(reference: string): string {
   return `${confirmationHref(reference)}/calendar.ics`;
 }

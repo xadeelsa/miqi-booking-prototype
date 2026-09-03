@@ -9,12 +9,8 @@ import {
 } from "./fixtures";
 
 /**
- * The guarantee the whole design rests on: a slot cannot be booked twice, even
- * when the winner is decided by microseconds rather than by turn-taking.
- *
- * These tests talk to a real Postgres deliberately. The protection is a UNIQUE
- * constraint, which is a database feature - a mocked Prisma would only prove
- * that the mock does what the test told it to.
+ * A slot cannot be booked twice. Real Postgres, because the protection is a
+ * UNIQUE constraint and a mocked Prisma would only prove the mock.
  */
 
 const CONCURRENT_ATTEMPTS = 10;
@@ -48,8 +44,6 @@ describe("createBooking", () => {
     });
     expect(stored.paymentStatus).toBe("PAID");
     expect(stored.parentEmail).toBe("anne.devries@example.nl");
-    // The request never carries an amount, so this can only have come from the
-    // service the booking was priced against.
     expect(stored.priceCents).toBe(service.priceCents);
   });
 
@@ -72,10 +66,8 @@ describe("createBooking", () => {
     const slot = await createFixtureSlot();
     const input = bookingInputFor(service.slug, slot.id);
 
-    // Each attempt checks availability before writing, and right now the slot
-    // is free - so the check waves all ten of them through. Nothing but the
-    // unique constraint stands between them and ten bookings for one hour of
-    // one tutor's time.
+    // Every attempt sees a free slot, so nothing but the unique constraint
+    // stands between them and ten bookings for one hour.
     const results = await Promise.all(
       Array.from({ length: CONCURRENT_ATTEMPTS }, () => createBooking(input)),
     );
@@ -85,19 +77,16 @@ describe("createBooking", () => {
 
     expect(references).toHaveLength(1);
 
-    // Losing is an ordinary outcome rather than an exception: none of these
-    // threw, and every loser came back knowing why.
+    // Losing is an ordinary outcome: none of these threw.
     expect(reasons).toStrictEqual(
       Array(CONCURRENT_ATTEMPTS - 1).fill("taken"),
     );
 
-    // And the part that actually matters - the database agrees.
     expect(await db.booking.count({ where: { slotId: slot.id } })).toBe(1);
   });
 
   test(`books ${DISTINCT_SLOTS} different slots at once, all of them successfully`, async () => {
-    // Guards the opposite failure: a constraint that rejected everything after
-    // the first booking would satisfy the test above just as well.
+    // Guards the opposite failure: a constraint that rejected everything.
     const service = await createFixtureService();
     const slots = await Promise.all(
       Array.from({ length: DISTINCT_SLOTS }, (_, i) => createFixtureSlot(i)),
@@ -110,7 +99,6 @@ describe("createBooking", () => {
     const references = results.flatMap((r) => (r.ok ? [r.reference] : []));
 
     expect(references).toHaveLength(DISTINCT_SLOTS);
-    // Every booking gets its own reference, which is the other unique column.
     expect(new Set(references).size).toBe(DISTINCT_SLOTS);
     expect(await db.booking.count({ where: { serviceId: service.id } })).toBe(
       DISTINCT_SLOTS,

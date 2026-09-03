@@ -1,16 +1,8 @@
 import { SCHOOL_LEVEL_LABELS, type SchoolLevel } from "./catalog";
 
 /**
- * Calendar hand-off for a confirmed booking, in the two forms that between
- * them cover everyone: a Google Calendar template URL, and an .ics file for
- * Apple Calendar, Outlook and anything else.
- *
- * Both are built from the stored Booking, and both emit times in UTC. Slot
- * times are stored as instants, so UTC is exact - and it sidesteps having to
- * ship a VTIMEZONE block for Europe/Amsterdam just to say the same thing.
- *
- * Structural input type, so this needs no database to test and doesn't care
- * which query loaded the booking.
+ * Google Calendar URL and .ics file for a confirmed booking. Times are emitted
+ * in UTC, which avoids shipping a VTIMEZONE block for Europe/Amsterdam.
  */
 export type CalendarBooking = {
   reference: string;
@@ -23,10 +15,6 @@ export type CalendarBooking = {
   slot: { startsAt: Date; endsAt: Date };
 };
 
-/**
- * Slots carry no location - there is one tutor and one calendar in this
- * prototype. A real schema would hang this off the slot or the tutor.
- */
 const LOCATION = "MIQI Huiswerkbegeleiding, Amsterdam";
 
 /** UID needs to be globally unique and stable; the reference already is. */
@@ -61,10 +49,7 @@ export function googleCalendarUrl(booking: CalendarBooking): string {
   return `https://calendar.google.com/calendar/render?${params}`;
 }
 
-/**
- * RFC 5545 §3.3.11: backslashes, semicolons and commas are delimiters inside
- * a property value, and newlines have to travel as a literal `\n`.
- */
+/** RFC 5545 §3.3.11: escape the delimiters, and send newlines as a literal. */
 function escapeText(value: string): string {
   return value
     .replace(/\\/g, "\\\\")
@@ -76,10 +61,8 @@ function escapeText(value: string): string {
 const MAX_OCTETS = 75;
 
 /**
- * RFC 5545 §3.1: no line may exceed 75 octets, and continuations start with a
- * single space. The limit is octets rather than characters, which matters as
- * soon as a Dutch name brings a multi-byte character with it - so this counts
- * UTF-8 bytes and iterates by code point, never splitting one in half.
+ * RFC 5545 §3.1: fold at 75 octets, not characters, so this counts UTF-8 bytes
+ * and iterates by code point. Continuations start with a single space.
  */
 function foldLine(line: string): string {
   if (Buffer.byteLength(line, "utf8") <= MAX_OCTETS) return line;
@@ -115,8 +98,7 @@ export function bookingIcs(booking: CalendarBooking): string {
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
     `UID:${booking.reference}@${UID_DOMAIN}`,
-    // DTSTAMP is when the record was made, not when the file was served, so
-    // the same booking always produces a byte-identical file.
+    // Booking time, not serve time, so the file is byte-identical every time.
     `DTSTAMP:${utcStamp(booking.createdAt)}`,
     `DTSTART:${utcStamp(booking.slot.startsAt)}`,
     `DTEND:${utcStamp(booking.slot.endsAt)}`,
@@ -128,6 +110,6 @@ export function bookingIcs(booking: CalendarBooking): string {
     "END:VCALENDAR",
   ];
 
-  // CRLF throughout, including a trailing one - some parsers are strict.
+  // CRLF throughout, including a trailing one. Some parsers are strict.
   return `${lines.map(foldLine).join("\r\n")}\r\n`;
 }

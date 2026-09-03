@@ -11,11 +11,8 @@ import {
 } from "@/lib/validation";
 
 /**
- * The server boundary. No database here - these tests are about what the
- * server refuses to believe, which is decided before anything is queried.
- *
- * Every input below is written the way it actually arrives: strings from a
- * URL or a form, never pre-typed objects.
+ * The server boundary, no database. Inputs are written the way they arrive:
+ * strings from a URL or a form, never pre-typed objects.
  */
 
 /** A well-formed submission, as `FormData` and search params would supply it. */
@@ -45,7 +42,6 @@ describe("bookingInputSchema", () => {
   test("accepts a well-formed submission and normalises it", () => {
     const result = bookingInputSchema.parse(
       rawBooking({
-        // Whatever a parent's keyboard and clipboard produced.
         parentName: "  Anne de Vries  ",
         parentEmail: "  Anne.DeVries@Example.NL ",
         studentName: "Sem de Vries ",
@@ -57,7 +53,6 @@ describe("bookingInputSchema", () => {
       level: "VWO",
       year: "Klas 4",
       subject: "Wiskunde",
-      // Search params are strings; the Booking needs a row id.
       slot: 12,
       parentName: "Anne de Vries",
       parentEmail: "anne.devries@example.nl",
@@ -67,10 +62,8 @@ describe("bookingInputSchema", () => {
   });
 
   test("treats a blank phone number as absent rather than as an empty string", () => {
-    // An untouched optional input still posts "". parentPhone is nullable, and
-    // an empty string in a phone column is worse than nothing - it reads as
-    // data. undefined is what Prisma takes as "no value given", so the column
-    // ends up NULL.
+    // An untouched optional input posts "". undefined is what Prisma takes as
+    // "no value given", so the column ends up NULL rather than empty.
     expect(
       bookingInputSchema.parse(rawBooking({ parentPhone: "" })).parentPhone,
     ).toBeUndefined();
@@ -84,8 +77,7 @@ describe("bookingInputSchema", () => {
   });
 
   test("discards anything it was not asked for, including a price", () => {
-    // The single most valuable thing to forge. The schema is the reason
-    // priceCents can only ever come from the Service row.
+    // The single most valuable field to forge.
     const result = bookingInputSchema.parse(
       rawBooking({ priceCents: 1, paymentStatus: "PAID", reference: "MIQI-AAAAA" }),
     );
@@ -112,8 +104,7 @@ describe("bookingInputSchema", () => {
   });
 
   test("rejects a year that belongs to a different level", () => {
-    // Field-by-field this is fine: "Groep 5" is a real year, VWO is a real
-    // level. Only together are they nonsense.
+    // Both are real on their own. Only together are they nonsense.
     const errors = errorsFor(rawBooking({ year: "Groep 5" }));
 
     expect(errors.year).toBe("Groep 5 is not a year in VWO.");
@@ -142,9 +133,7 @@ describe("bookingInputSchema", () => {
   });
 
   test("holds back cross-field messages until the fields themselves are sound", () => {
-    // level is unreadable, so "is this year valid for that level?" has no
-    // meaningful answer yet. Asking anyway would mean a form that blames the
-    // year for the level being wrong.
+    // level is unreadable, so the year check has no meaningful answer yet.
     const errors = errorsFor(rawBooking({ level: "UNIVERSITEIT", year: "Groep 5" }));
 
     expect(Object.keys(errors)).toStrictEqual(["level"]);
@@ -174,8 +163,7 @@ describe("selection schemas", () => {
 
 describe("detailsSchema", () => {
   test("vets the draft cookie the same way it vets the form", () => {
-    // The cookie is httpOnly, but it is still input - a stale or hand-edited
-    // one has to fail the same checks rather than reach the Booking.
+    // httpOnly, but still client input.
     expect(detailsSchema.safeParse({ parentName: "Anne de Vries" }).success).toBe(
       false,
     );
