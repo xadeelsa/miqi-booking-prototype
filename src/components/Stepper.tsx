@@ -1,4 +1,11 @@
-const STEPS = ["Service", "Level", "Time", "Details", "Payment"] as const;
+const STEPS = [
+  "Service",
+  "Level",
+  "Time",
+  "Details",
+  "Review",
+  "Payment",
+] as const;
 
 export function Stepper({ current }: { current: number }) {
   return (
