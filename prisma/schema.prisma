@@ -21,6 +21,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Service {
+  id          Int       @id @default(autoincrement())
+  slug        String    @unique
+  name        String
+  description String
+  priceCents  Int
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  bookings    Booking[]
+
+  @@map("services")
+}
+
+model Slot {
+  id        Int      @id @default(autoincrement())
+  startsAt  DateTime @unique
+  endsAt    DateTime
+  createdAt DateTime @default(now())
+  booking   Booking?
+
+  @@index([startsAt])
+  @@map("slots")
+}
+
+model Booking {
+  id        Int    @id @default(autoincrement())
+  reference String @unique
+
+  // The hero: one booking per slot, enforced by the database.
+  slotId Int @unique
+
+  serviceId Int
+
+  // Captured selection (validated against src/lib/catalog.ts).
+  schoolLevel SchoolLevel
+  year        String
+  subject     String
+
+  // Contact details.
+  parentName  String
+  parentEmail String
+  parentPhone String?
+  studentName String
+
+  // Price snapshot + payment state.
+  priceCents    Int
+  paymentStatus PaymentStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+
+  service Service @relation(fields: [serviceId], references: [id])
+  slot    Slot    @relation(fields: [slotId], references: [id])
+
+  @@index([serviceId])
+  @@index([createdAt])
+  @@map("bookings")
+}
+
 enum SchoolLevel {
   BASISSCHOOL
   VMBO
@@ -32,63 +90,4 @@ enum PaymentStatus {
   PENDING
   PAID
   FAILED
-}
-
-model Service {
-  id          Int       @id @default(autoincrement())
-  slug        String    @unique
-  name        String
-  description String
-  priceCents  Int
-  active      Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-
-  bookings    Booking[]
-
-  @@map("services")
-}
-
-model Slot {
-  id        Int      @id @default(autoincrement())
-  startsAt  DateTime @unique
-  endsAt    DateTime
-  createdAt DateTime @default(now())
-
-  booking   Booking?
-
-  @@index([startsAt])
-  @@map("slots")
-}
-
-model Booking {
-  id            Int           @id @default(autoincrement())
-  reference     String        @unique
-
-  // The hero: one booking per slot, enforced by the database.
-  slotId        Int           @unique
-  slot          Slot          @relation(fields: [slotId], references: [id])
-
-  serviceId     Int
-  service       Service       @relation(fields: [serviceId], references: [id])
-
-  // Captured selection (validated against src/lib/catalog.ts).
-  schoolLevel   SchoolLevel
-  year          String
-  subject       String
-
-  // Contact details.
-  parentName    String
-  parentEmail   String
-  parentPhone   String?
-  studentName   String
-
-  // Price snapshot + payment state.
-  priceCents    Int
-  paymentStatus PaymentStatus @default(PENDING)
-
-  createdAt     DateTime      @default(now())
-
-  @@index([serviceId])
-  @@index([createdAt])
-  @@map("bookings")
 }

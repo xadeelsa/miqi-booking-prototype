@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type SchoolLevel } from "@prisma/client";
 
 const db = new PrismaClient();
 
@@ -22,6 +22,47 @@ const services = [
     name: "Examentraining",
     description: "Focused preparation for school and final exams.",
     priceCents: 6000,
+  },
+];
+
+// A couple of example bookings so a fresh clone has something to look at:
+// /admin is populated immediately, and these slots visibly disappear from the
+// available list — the anti-double-booking guarantee demonstrating itself.
+const exampleBookings: {
+  reference: string;
+  serviceSlug: string;
+  slotIndex: number;
+  schoolLevel: SchoolLevel;
+  year: string;
+  subject: string;
+  parentName: string;
+  parentEmail: string;
+  parentPhone: string;
+  studentName: string;
+}[] = [
+  {
+    reference: "MIQI-7QK4P",
+    serviceSlug: "bijles-1op1",
+    slotIndex: 0,
+    schoolLevel: "VWO",
+    year: "Klas 4",
+    subject: "Wiskunde",
+    parentName: "Anne de Vries",
+    parentEmail: "anne.devries@example.nl",
+    parentPhone: "+31 6 1234 5678",
+    studentName: "Sem de Vries",
+  },
+  {
+    reference: "MIQI-3XB9M",
+    serviceSlug: "huiswerkbegeleiding",
+    slotIndex: 3,
+    schoolLevel: "HAVO",
+    year: "Klas 2",
+    subject: "Engels",
+    parentName: "Youssef Bakker",
+    parentEmail: "y.bakker@example.nl",
+    parentPhone: "+31 6 8765 4321",
+    studentName: "Lina Bakker",
   },
 ];
 
@@ -72,8 +113,49 @@ async function main() {
     });
   }
 
+  // Example bookings (idempotent on `reference`).
+  const upcoming = await db.slot.findMany({
+    orderBy: { startsAt: "asc" },
+    take: 10,
+  });
+
+  let created = 0;
+  for (const example of exampleBookings) {
+    const slot = upcoming[example.slotIndex];
+    const service = await db.service.findUnique({
+      where: { slug: example.serviceSlug },
+    });
+    if (!slot || !service) continue;
+
+    // Skip if this slot is already taken by a different booking.
+    const slotTaken = await db.booking.findUnique({
+      where: { slotId: slot.id },
+    });
+    if (slotTaken && slotTaken.reference !== example.reference) continue;
+
+    await db.booking.upsert({
+      where: { reference: example.reference },
+      update: {},
+      create: {
+        reference: example.reference,
+        slotId: slot.id,
+        serviceId: service.id,
+        schoolLevel: example.schoolLevel,
+        year: example.year,
+        subject: example.subject,
+        parentName: example.parentName,
+        parentEmail: example.parentEmail,
+        parentPhone: example.parentPhone,
+        studentName: example.studentName,
+        priceCents: service.priceCents,
+        paymentStatus: "PAID",
+      },
+    });
+    created++;
+  }
+
   console.log(
-    `Seeded ${services.length} services and ${slots.length} slots.`,
+    `Seeded ${services.length} services, ${slots.length} slots and ${created} example bookings.`,
   );
 }
 
