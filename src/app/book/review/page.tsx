@@ -2,20 +2,16 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { ConfirmForm } from "@/components/ConfirmForm";
+import { StepUnavailable } from "@/components/StepUnavailable";
 import { Stepper } from "@/components/Stepper";
 import { Card } from "@/components/ui/Card";
-import { Note } from "@/components/ui/Note";
-import {
-  loadBookingContext,
-  selectionQuery,
-  slotsHref,
-  UNAVAILABLE_MESSAGES,
-} from "@/lib/booking";
+import { detailsHref, slotsHref } from "@/lib/booking";
 import { SCHOOL_LEVEL_LABELS } from "@/lib/catalog";
-import { readDetailsDraft } from "@/lib/draft";
 import { formatDateTime, formatPrice } from "@/lib/format";
-import { parseBookingSelection } from "@/lib/validation";
+import { resolveFunnelStep } from "@/lib/funnel";
 import { confirmBooking } from "./actions";
+
+const TITLE = "Review your booking";
 
 function Row({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -31,53 +27,41 @@ export default async function ReviewPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const selection = parseBookingSelection(await searchParams);
-  if (!selection) notFound();
+  const step = await resolveFunnelStep(await searchParams);
 
-  const context = await loadBookingContext(selection);
-
-  if (!context.ok) {
+  if (step.status === "invalid") notFound();
+  if (step.status === "unavailable") {
     return (
-      <div>
-        <Stepper current={5} />
-        <h1 className="text-xl font-semibold tracking-tight">
-          Review your booking
-        </h1>
-        <Note className="mt-6">{UNAVAILABLE_MESSAGES[context.reason]}</Note>
-        <Link
-          href={slotsHref(selection)}
-          className="mt-6 inline-block text-sm text-muted underline hover:text-ink"
-        >
-          Choose another time
-        </Link>
-      </div>
+      <StepUnavailable
+        step={5}
+        title={TITLE}
+        reason={step.reason}
+        backHref={slotsHref(step.selection)}
+      />
     );
   }
 
-  const detailsHref = `/book/details?${selectionQuery(selection)}`;
+  const { selection, service, slot, priceCents, details } = step;
 
-  // Landing here without a draft means a direct link or an expired cookie —
-  // send the parent to the form rather than showing half a summary.
-  const details = await readDetailsDraft();
-  if (!details) redirect(detailsHref);
+  // No draft means a direct link or an expired cookie — send the parent to the
+  // form rather than showing half a summary.
+  if (!details) redirect(detailsHref(selection));
 
   return (
     <div>
       <Stepper current={5} />
-      <h1 className="text-xl font-semibold tracking-tight">
-        Review your booking
-      </h1>
+      <h1 className="text-xl font-semibold tracking-tight">{TITLE}</h1>
       <p className="mt-2 text-sm text-muted">
         Please check everything before you pay.
       </p>
 
       <Card className="mt-6">
         <dl className="divide-y divide-line text-sm">
-          <Row label="Service" value={context.service.name} />
+          <Row label="Service" value={service.name} />
           <Row label="Level" value={SCHOOL_LEVEL_LABELS[selection.level]} />
           <Row label="Year" value={selection.year} />
           <Row label="Subject" value={selection.subject} />
-          <Row label="Time" value={formatDateTime(context.slot.startsAt)} />
+          <Row label="Time" value={formatDateTime(slot.startsAt)} />
           <Row label="Parent / guardian" value={details.parentName} />
           <Row label="Student" value={details.studentName} />
           <Row label="Email" value={details.parentEmail} />
@@ -88,7 +72,7 @@ export default async function ReviewPage({
             label="Total"
             value={
               <span className="font-semibold text-brand">
-                {formatPrice(context.priceCents)}
+                {formatPrice(priceCents)}
               </span>
             }
           />
@@ -98,7 +82,10 @@ export default async function ReviewPage({
       <ConfirmForm action={confirmBooking.bind(null, selection)} />
 
       <div className="mt-6 flex gap-4 text-sm">
-        <Link href={detailsHref} className="text-muted underline hover:text-ink">
+        <Link
+          href={detailsHref(selection)}
+          className="text-muted underline hover:text-ink"
+        >
           Edit details
         </Link>
         <Link

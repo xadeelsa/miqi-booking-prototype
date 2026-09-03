@@ -161,8 +161,16 @@ export function selectionQuery(selection: BookingSelection): string {
   }).toString();
 }
 
-/** The step-3 URL, for "pick another time" links out of steps 4 and 5. */
+/** The step-3 URL, for "pick another time" links out of the later steps. */
 export function slotsHref(selection: BookingSelection): string {
   const { service, level, year, subject } = selection;
   return `/book/slots?${new URLSearchParams({ service, level, year, subject })}`;
+}
+
+export function detailsHref(selection: BookingSelection): string {
+  return `/book/details?${selectionQuery(selection)}`;
+}
+
+export function reviewHref(selection: BookingSelection): string {
+  return `/book/review?${selectionQuery(selection)}`;
 }
