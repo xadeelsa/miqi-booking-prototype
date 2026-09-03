@@ -15,7 +15,7 @@ export function buttonClass(
   className?: string,
 ) {
   return cx(
-    "inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium transition disabled:pointer-events-none disabled:opacity-50",
+    "inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold tracking-tight transition disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2",
     VARIANTS[variant],
     className,
   );

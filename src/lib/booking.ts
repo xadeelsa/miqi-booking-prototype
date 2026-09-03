@@ -174,3 +174,7 @@ export function detailsHref(selection: BookingSelection): string {
 export function reviewHref(selection: BookingSelection): string {
   return `/book/review?${selectionQuery(selection)}`;
 }
+
+export function paymentHref(selection: BookingSelection): string {
+  return `/book/payment?${selectionQuery(selection)}`;
+}

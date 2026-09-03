@@ -44,3 +44,11 @@ export async function saveDetailsDraft(details: BookingDetails): Promise<void> {
     maxAge: MAX_AGE_SECONDS,
   });
 }
+
+/**
+ * Dropped as soon as the booking exists, so the contact details don't outlive
+ * the funnel that needed them — from then on the Booking row is the record.
+ */
+export async function clearDetailsDraft(): Promise<void> {
+  (await cookies()).delete({ name: COOKIE, path: "/book" });
+}

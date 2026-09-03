@@ -1,15 +1,14 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
-import { ConfirmForm } from "@/components/ConfirmForm";
 import { StepUnavailable } from "@/components/StepUnavailable";
 import { Stepper } from "@/components/Stepper";
+import { buttonClass } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { detailsHref, slotsHref } from "@/lib/booking";
+import { detailsHref, paymentHref, slotsHref } from "@/lib/booking";
 import { SCHOOL_LEVEL_LABELS } from "@/lib/catalog";
 import { formatDateTime, formatPrice } from "@/lib/format";
 import { resolveFunnelStep } from "@/lib/funnel";
-import { confirmBooking } from "./actions";
 
 const TITLE = "Review your booking";
 
@@ -79,7 +78,14 @@ export default async function ReviewPage({
         </dl>
       </Card>
 
-      <ConfirmForm action={confirmBooking.bind(null, selection)} />
+      {/* Plain navigation: nothing is written until the payment succeeds, and
+          the payment step re-validates everything on arrival anyway. */}
+      <Link
+        href={paymentHref(selection)}
+        className={buttonClass("primary", "mt-6")}
+      >
+        Continue to payment
+      </Link>
 
       <div className="mt-6 flex gap-4 text-sm">
         <Link

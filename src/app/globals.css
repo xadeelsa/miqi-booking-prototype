@@ -6,6 +6,7 @@
   --color-brand: #226e90; /* button fill — 5.0:1 with white */
   --color-brand-strong: #1a576f; /* hover / pressed */
   --color-brand-soft: #308ab0; /* MIQI blue, verbatim */
+  --color-brand-tint: #e7f2f7;
   --color-accent: #ff9600; /* MIQI orange, verbatim */
   --color-accent-tint: #fff4e3;
 
@@ -20,6 +21,10 @@
 body {
   background: var(--color-canvas);
   color: var(--color-ink);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: var(--color-accent-tint);
+  color: var(--color-ink);
 }

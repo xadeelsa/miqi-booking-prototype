@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import "./globals.css";
 import { Raleway } from "next/font/google";
-const raleway = Raleway({ subsets: ["latin"], variable: "--font-raleway" });
+import "./globals.css";
+
+const raleway = Raleway({
+  subsets: ["latin"],
+  variable: "--font-raleway",
+});
 
 export const metadata: Metadata = {
   title: "MIQI Huiswerkbegeleiding — Book a session",
@@ -17,24 +21,34 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${raleway.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+      <body className="flex min-h-full flex-col font-sans">
+        <div className="h-1 bg-accent" aria-hidden />
+
         <header className="border-b border-line bg-surface">
-          <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
-            <Link href="/" className="font-semibold tracking-tight text-ink">
-              MIQI <span className="text-brand">Huiswerkbegeleiding</span>
+          <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3.5">
+            <Link href="/" className="flex items-baseline gap-2">
+              <span className="text-lg font-bold tracking-[0.06em] text-brand-soft">
+                MIQI
+              </span>
+              <span className="hidden text-sm font-medium text-ink sm:inline">
+                Huiswerkbegeleiding
+              </span>
             </Link>
-            <span className="rounded-full border border-line px-2.5 py-1 text-xs text-muted">
-              Prototype
-            </span>
+            <Link
+              href="/book"
+              className="text-sm font-semibold text-brand transition hover:text-brand-strong"
+            >
+              Book a session
+            </Link>
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">
+        <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">
           {children}
         </main>
 
         <footer className="border-t border-line bg-surface">
-          <div className="mx-auto max-w-3xl px-4 py-5 text-xs text-muted">
+          <div className="mx-auto max-w-3xl px-4 py-5 text-xs leading-5 text-muted">
             Demo environment with fictitious data. Payment, email and calendar
             integrations are simulated.
           </div>

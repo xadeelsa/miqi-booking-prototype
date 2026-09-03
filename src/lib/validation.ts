@@ -93,6 +93,15 @@ export const bookingInputSchema = z
   .object({ ...selectionShape, ...slotShape, ...detailsShape })
   .check(checkCatalog);
 
+/**
+ * Which branch of the simulated payment to take. It arrives from a form, so
+ * it is validated like any other input even though only the prototype's own
+ * buttons ever set it.
+ */
+export const paymentOutcomeSchema = z.enum(["success", "failure"]);
+
+export type PaymentOutcome = z.infer<typeof paymentOutcomeSchema>;
+
 export type Selection = z.infer<typeof selectionSchema>;
 export type BookingSelection = z.infer<typeof bookingSelectionSchema>;
 export type BookingDetails = z.infer<typeof detailsSchema>;

@@ -5,7 +5,10 @@ export function Card({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       {...props}
-      className={cx("rounded-xl border border-line bg-surface p-5", className)}
+      className={cx(
+        "rounded-xl border border-line bg-surface p-5 sm:p-6",
+        className,
+      )}
     />
   );
 }
