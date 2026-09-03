@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
+import { Select } from "@/components/ui/Select";
 import {
   SCHOOL_LEVELS,
   SCHOOL_LEVEL_LABELS,
@@ -23,24 +26,18 @@ export function LevelPicker({ serviceSlug }: { serviceSlug: string }) {
   const years = level ? YEARS_BY_LEVEL[level] : [];
   const subjects = level ? SUBJECTS_BY_LEVEL[level] : [];
 
-  const selectClass =
-    "mt-1 w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-sm disabled:bg-canvas disabled:text-muted";
+  const placeholder = level ? "Make a choice" : "Choose a level first";
 
   return (
     <form action="/book/slots" method="get" className="mt-6 space-y-5">
       <input type="hidden" name="service" value={serviceSlug} />
 
-      <div>
-        <label htmlFor="level" className="text-sm font-medium">
-          School level
-        </label>
-        <select
-          id="level"
+      <Field label="School level">
+        <Select
           name="level"
           required
           value={level}
           onChange={(e) => setLevel(e.target.value as SchoolLevel | "")}
-          className={selectClass}
         >
           <option value="">Make a choice</option>
           {SCHOOL_LEVELS.map((l) => (
@@ -48,61 +45,32 @@ export function LevelPicker({ serviceSlug }: { serviceSlug: string }) {
               {SCHOOL_LEVEL_LABELS[l]}
             </option>
           ))}
-        </select>
-      </div>
+        </Select>
+      </Field>
 
-      <div>
-        <label htmlFor="year" className="text-sm font-medium">
-          Year
-        </label>
-        <select
-          id="year"
-          name="year"
-          required
-          disabled={!level}
-          className={selectClass}
-          defaultValue=""
-        >
-          <option value="">
-            {level ? "Make a choice" : "Choose a level first"}
-          </option>
+      <Field label="Year">
+        <Select name="year" required disabled={!level} defaultValue="">
+          <option value="">{placeholder}</option>
           {years.map((y) => (
             <option key={y} value={y}>
               {y}
             </option>
           ))}
-        </select>
-      </div>
+        </Select>
+      </Field>
 
-      <div>
-        <label htmlFor="subject" className="text-sm font-medium">
-          Subject
-        </label>
-        <select
-          id="subject"
-          name="subject"
-          required
-          disabled={!level}
-          className={selectClass}
-          defaultValue=""
-        >
-          <option value="">
-            {level ? "Make a choice" : "Choose a level first"}
-          </option>
+      <Field label="Subject">
+        <Select name="subject" required disabled={!level} defaultValue="">
+          <option value="">{placeholder}</option>
           {subjects.map((s) => (
             <option key={s} value={s}>
               {s}
             </option>
           ))}
-        </select>
-      </div>
+        </Select>
+      </Field>
 
-      <button
-        type="submit"
-        className="rounded-lg bg-brand px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-strong"
-      >
-        View available times
-      </button>
+      <Button type="submit">View available times</Button>
     </form>
   );
 }

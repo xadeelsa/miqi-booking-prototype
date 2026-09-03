@@ -1,13 +1,20 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-ink: #10221c;
-  --color-muted: #5b6b66;
-  --color-line: #dbe4e0;
+  /* Brand */
+  --font-sans: var(--font-raleway, ui-sans-serif, system-ui, sans-serif);
+  --color-brand: #226e90; /* button fill — 5.0:1 with white */
+  --color-brand-strong: #1a576f; /* hover / pressed */
+  --color-brand-soft: #308ab0; /* MIQI blue, verbatim */
+  --color-accent: #ff9600; /* MIQI orange, verbatim */
+  --color-accent-tint: #fff4e3;
+
+  /* Neutrals */
+  --color-ink: #2f3337;
+  --color-muted: #5f6a70;
+  --color-line: #e2e7ea;
   --color-surface: #ffffff;
-  --color-canvas: #f5f8f7;
-  --color-brand: #0f6f5c;
-  --color-brand-strong: #0b5546;
+  --color-canvas: #f7f6f4;
 }
 
 body {
