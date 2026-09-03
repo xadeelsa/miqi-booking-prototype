@@ -3,23 +3,24 @@ import { PrismaClient } from "@prisma/client";
 const db = new PrismaClient();
 
 // Fictitious tutoring services (prices in cents).
+// Service names stay in Dutch — they are the client's real product names.
 const services = [
   {
     slug: "bijles-1op1",
     name: "Bijles 1-op-1",
-    description: "Persoonlijke één-op-één bijles, afgestemd op je kind.",
+    description: "Personal one-to-one tutoring, tailored to your child.",
     priceCents: 4500,
   },
   {
     slug: "huiswerkbegeleiding",
     name: "Huiswerkbegeleiding",
-    description: "Begeleiding bij het maken en plannen van huiswerk.",
+    description: "Guidance with planning and completing homework.",
     priceCents: 2500,
   },
   {
     slug: "examentraining",
     name: "Examentraining",
-    description: "Gerichte voorbereiding op school- en eindexamens.",
+    description: "Focused preparation for school and final exams.",
     priceCents: 6000,
   },
 ];

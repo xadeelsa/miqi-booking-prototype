@@ -47,3 +47,7 @@ next-env.d.ts
 
 # scratch
 .writetest
+
+# next.js agent files (auto-generated)
+AGENTS.md
+CLAUDE.md
