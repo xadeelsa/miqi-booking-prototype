@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Stepper } from "@/components/Stepper";
+import { BackLink } from "@/components/ui/BackLink";
+import { Card } from "@/components/ui/Card";
+import { Note } from "@/components/ui/Note";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { getAvailableSlots, getServiceBySlug } from "@/lib/queries";
 import { dayKey, formatDayLong, formatPrice, formatTime } from "@/lib/format";
 import { parseSelection } from "@/lib/validation";
@@ -41,24 +45,22 @@ export default async function ChooseSlotPage({
   return (
     <div>
       <Stepper current={3} />
-      <h1 className="text-xl font-semibold tracking-tight">Choose a time</h1>
-      <p className="mt-2 text-sm text-muted">
+      <PageHeader title="Choose a time">
         {service.name} · {year} · {subject} —{" "}
         <span className="text-ink">{formatPrice(service.priceCents)}</span>
-      </p>
+      </PageHeader>
 
       {byDay.size === 0 ? (
-        <p className="mt-6 rounded-lg border border-line bg-surface p-4 text-sm text-muted">
-          There are no available times at the moment.
-        </p>
+        <Note className="mt-6">There are no available times at the moment.</Note>
       ) : (
-        <div className="mt-6 space-y-5">
+        <div className="mt-6 space-y-4">
           {[...byDay.entries()].map(([key, daySlots]) => (
-            <section
-              key={key}
-              className="rounded-xl border border-line bg-surface p-5"
-            >
-              <h2 className="text-sm font-medium capitalize">
+            <Card key={key} className="p-5">
+              <h2 className="flex items-center gap-2 text-sm font-semibold capitalize">
+                <span
+                  aria-hidden
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                />
                 {formatDayLong(daySlots[0].startsAt)}
               </h2>
               <ul className="mt-3 flex flex-wrap gap-2">
@@ -66,24 +68,21 @@ export default async function ChooseSlotPage({
                   <li key={slot.id}>
                     <Link
                       href={`/book/details?${query.toString()}&slot=${slot.id}`}
-                      className="inline-flex rounded-lg border border-line px-3 py-2 text-sm transition hover:border-brand hover:text-brand"
+                      className="inline-flex min-w-[4.75rem] items-center justify-center rounded-lg border border-line bg-canvas px-3 py-2 text-sm font-medium tabular-nums transition hover:border-brand hover:bg-surface hover:text-brand"
                     >
                       {formatTime(slot.startsAt)}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </section>
+            </Card>
           ))}
         </div>
       )}
 
-      <Link
-        href={`/book/level?service=${encodeURIComponent(service.slug)}`}
-        className="mt-6 inline-block text-sm text-muted underline hover:text-ink"
-      >
+      <BackLink href={`/book/level?service=${encodeURIComponent(service.slug)}`}>
         Back
-      </Link>
+      </BackLink>
     </div>
   );
 }

@@ -178,3 +178,11 @@ export function reviewHref(selection: BookingSelection): string {
 export function paymentHref(selection: BookingSelection): string {
   return `/book/payment?${selectionQuery(selection)}`;
 }
+
+/**
+ * The end of the funnel. Keyed by reference rather than by row id so the URL
+ * is the thing the parent already has in their email.
+ */
+export function confirmationHref(reference: string): string {
+  return `/book/confirmation/${encodeURIComponent(reference)}`;
+}

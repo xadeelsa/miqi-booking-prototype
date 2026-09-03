@@ -21,7 +21,7 @@ export function Field({
 }) {
   return (
     <label className={cx("block", className)}>
-      <span className="text-sm font-medium">{label}</span>
+      <span className="text-sm font-medium text-ink">{label}</span>
       {hint && <span className="mt-0.5 block text-xs text-muted">{hint}</span>}
       <span className="mt-1 block">{children}</span>
       {error && (

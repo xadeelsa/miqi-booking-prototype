@@ -16,6 +16,14 @@ import { randomInt } from "node:crypto";
 const ALPHABET = "23456789ABCDEFGHJKMNPQRSTVWXYZ";
 const LENGTH = 5;
 
+/**
+ * Derived from the alphabet rather than written out, so the generator and the
+ * validator can't drift apart.
+ */
+export const REFERENCE_PATTERN = new RegExp(
+  `^MIQI-[${ALPHABET}]{${LENGTH}}$`,
+);
+
 export function bookingReference(): string {
   let code = "";
   // randomInt over the alphabet length rather than `% ALPHABET.length` on a

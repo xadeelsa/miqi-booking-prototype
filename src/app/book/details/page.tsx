@@ -1,8 +1,10 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DetailsForm } from "@/components/DetailsForm";
 import { StepUnavailable } from "@/components/StepUnavailable";
 import { Stepper } from "@/components/Stepper";
+import { BackLink } from "@/components/ui/BackLink";
+import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { slotsHref } from "@/lib/booking";
 import { formatDateTime, formatPrice } from "@/lib/format";
 import { resolveFunnelStep } from "@/lib/funnel";
@@ -33,21 +35,17 @@ export default async function DetailsPage({
   return (
     <div>
       <Stepper current={4} />
-      <h1 className="text-xl font-semibold tracking-tight">{TITLE}</h1>
-      <p className="mt-2 text-sm text-muted">
+      <PageHeader title={TITLE}>
         {service.name} · {selection.year} · {selection.subject} ·{" "}
         {formatDateTime(slot.startsAt)} —{" "}
         <span className="text-ink">{formatPrice(priceCents)}</span>
-      </p>
+      </PageHeader>
 
-      <DetailsForm selection={selection} defaults={details} />
+      <Card className="mt-6">
+        <DetailsForm selection={selection} defaults={details} />
+      </Card>
 
-      <Link
-        href={slotsHref(selection)}
-        className="mt-6 inline-block text-sm text-muted underline hover:text-ink"
-      >
-        Back
-      </Link>
+      <BackLink href={slotsHref(selection)}>Back</BackLink>
     </div>
   );
 }

@@ -30,7 +30,7 @@ export function DetailsForm({
   const errors = state.errors ?? {};
 
   return (
-    <form action={formAction} className="mt-6 space-y-5">
+    <form action={formAction} className="space-y-5">
       <input type="hidden" name="service" value={selection.service} />
       <input type="hidden" name="level" value={selection.level} />
       <input type="hidden" name="year" value={selection.year} />

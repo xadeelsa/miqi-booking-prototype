@@ -7,7 +7,7 @@ export function Note({ className, ...props }: ComponentProps<"p">) {
     <p
       {...props}
       className={cx(
-        "rounded-lg border border-line bg-surface p-4 text-sm text-muted",
+        "rounded-lg border border-line bg-brand-tint p-4 text-sm leading-6 text-muted",
         className,
       )}
     />

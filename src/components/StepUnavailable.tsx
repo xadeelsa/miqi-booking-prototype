@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { Stepper } from "@/components/Stepper";
+import { BackLink } from "@/components/ui/BackLink";
 import { Note } from "@/components/ui/Note";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { UNAVAILABLE_MESSAGES, type UnavailableReason } from "@/lib/booking";
 
 /**
@@ -23,14 +24,11 @@ export function StepUnavailable({
   return (
     <div>
       <Stepper current={step} />
-      <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-      <Note className="mt-6">{UNAVAILABLE_MESSAGES[reason]}</Note>
-      <Link
-        href={backHref}
-        className="mt-6 inline-block text-sm text-muted underline hover:text-ink"
-      >
-        Choose another time
-      </Link>
+      <PageHeader title={title} />
+      <Note className="mt-6 bg-accent-tint text-ink">
+        {UNAVAILABLE_MESSAGES[reason]}
+      </Note>
+      <BackLink href={backHref}>Choose another time</BackLink>
     </div>
   );
 }

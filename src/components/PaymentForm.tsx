@@ -3,7 +3,6 @@
 import { useActionState } from "react";
 import type { PaymentState } from "@/app/book/payment/actions";
 import { Button } from "@/components/ui/Button";
-import { Note } from "@/components/ui/Note";
 import { formatPrice } from "@/lib/format";
 
 const INITIAL: PaymentState = {};
@@ -20,19 +19,9 @@ export function PaymentForm({
   action: (state: PaymentState, formData: FormData) => Promise<PaymentState>;
   priceCents: number;
 }) {
+  // A successful payment redirects to the confirmation page, so the only
+  // state this form ever renders is a decline.
   const [state, formAction, pending] = useActionState(action, INITIAL);
-
-  if (state.booked) {
-    return (
-      <Note className="mt-6 text-ink">
-        Paid. Your reference is{" "}
-        <strong className="font-semibold tracking-wide">
-          {state.booked.reference}
-        </strong>
-        , and {formatPrice(state.booked.priceCents)} has been charged.
-      </Note>
-    );
-  }
 
   return (
     <form action={formAction} className="mt-6">

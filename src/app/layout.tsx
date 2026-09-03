@@ -21,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${raleway.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col font-sans">
+      <body className={`${raleway.className} flex min-h-full flex-col`}>
         <div className="h-1 bg-accent" aria-hidden />
 
         <header className="border-b border-line bg-surface">

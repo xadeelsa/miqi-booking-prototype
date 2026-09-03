@@ -5,6 +5,7 @@ import { StepUnavailable } from "@/components/StepUnavailable";
 import { Stepper } from "@/components/Stepper";
 import { buttonClass } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { detailsHref, paymentHref, slotsHref } from "@/lib/booking";
 import { SCHOOL_LEVEL_LABELS } from "@/lib/catalog";
 import { formatDateTime, formatPrice } from "@/lib/format";
@@ -14,9 +15,9 @@ const TITLE = "Review your booking";
 
 function Row({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="flex justify-between gap-6 py-2.5 first:pt-0 last:pb-0">
+    <div className="flex justify-between gap-6 py-3 first:pt-0 last:pb-0">
       <dt className="shrink-0 text-muted">{label}</dt>
-      <dd className="text-right">{value}</dd>
+      <dd className="text-right font-medium text-ink">{value}</dd>
     </div>
   );
 }
@@ -49,10 +50,9 @@ export default async function ReviewPage({
   return (
     <div>
       <Stepper current={5} />
-      <h1 className="text-xl font-semibold tracking-tight">{TITLE}</h1>
-      <p className="mt-2 text-sm text-muted">
+      <PageHeader title={TITLE}>
         Please check everything before you pay.
-      </p>
+      </PageHeader>
 
       <Card className="mt-6">
         <dl className="divide-y divide-line text-sm">
@@ -70,7 +70,7 @@ export default async function ReviewPage({
           <Row
             label="Total"
             value={
-              <span className="font-semibold text-brand">
+              <span className="text-base font-semibold text-brand">
                 {formatPrice(priceCents)}
               </span>
             }
@@ -90,13 +90,13 @@ export default async function ReviewPage({
       <div className="mt-6 flex gap-4 text-sm">
         <Link
           href={detailsHref(selection)}
-          className="text-muted underline hover:text-ink"
+          className="text-muted transition hover:text-brand"
         >
           Edit details
         </Link>
         <Link
           href={slotsHref(selection)}
-          className="text-muted underline hover:text-ink"
+          className="text-muted transition hover:text-brand"
         >
           Change time
         </Link>

@@ -30,3 +30,11 @@ export function getAvailableSlots() {
 export function getSlotById(id: number) {
   return db.slot.findUnique({ where: { id }, include: { booking: true } });
 }
+
+/** Everything the confirmation page shows, in one round trip. */
+export function getBookingByReference(reference: string) {
+  return db.booking.findUnique({
+    where: { reference },
+    include: { service: true, slot: true },
+  });
+}

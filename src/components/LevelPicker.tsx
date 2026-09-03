@@ -29,7 +29,7 @@ export function LevelPicker({ serviceSlug }: { serviceSlug: string }) {
   const placeholder = level ? "Make a choice" : "Choose a level first";
 
   return (
-    <form action="/book/slots" method="get" className="mt-6 space-y-5">
+    <form action="/book/slots" method="get" className="space-y-5">
       <input type="hidden" name="service" value={serviceSlug} />
 
       <Field label="School level">

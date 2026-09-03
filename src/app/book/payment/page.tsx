@@ -1,10 +1,11 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PaymentForm } from "@/components/PaymentForm";
 import { StepUnavailable } from "@/components/StepUnavailable";
 import { Stepper } from "@/components/Stepper";
+import { BackLink } from "@/components/ui/BackLink";
 import { Card } from "@/components/ui/Card";
 import { Note } from "@/components/ui/Note";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { detailsHref, reviewHref, slotsHref } from "@/lib/booking";
 import { formatDateTime, formatPrice } from "@/lib/format";
 import { resolveFunnelStep } from "@/lib/funnel";
@@ -37,17 +38,19 @@ export default async function PaymentPage({
   return (
     <div>
       <Stepper current={6} />
-      <h1 className="text-xl font-semibold tracking-tight">{TITLE}</h1>
-      <p className="mt-2 text-sm text-muted">
+      <PageHeader title={TITLE}>
         {service.name} · {formatDateTime(slot.startsAt)} for{" "}
         {details.studentName}
-      </p>
+      </PageHeader>
 
-      <Card className="mt-6 flex items-baseline justify-between">
-        <span className="text-sm text-muted">Amount due</span>
-        <span className="text-lg font-semibold text-brand">
-          {formatPrice(priceCents)}
-        </span>
+      <Card className="mt-6 overflow-hidden p-0">
+        <div className="h-1 bg-accent" aria-hidden />
+        <div className="flex items-baseline justify-between px-5 py-5 sm:px-6">
+          <span className="text-sm text-muted">Amount due</span>
+          <span className="text-xl font-semibold text-brand">
+            {formatPrice(priceCents)}
+          </span>
+        </div>
       </Card>
 
       <Note className="mt-4">
@@ -61,12 +64,7 @@ export default async function PaymentPage({
         priceCents={priceCents}
       />
 
-      <Link
-        href={reviewHref(selection)}
-        className="mt-6 inline-block text-sm text-muted underline hover:text-ink"
-      >
-        Back to review
-      </Link>
+      <BackLink href={reviewHref(selection)}>Back to review</BackLink>
     </div>
   );
 }

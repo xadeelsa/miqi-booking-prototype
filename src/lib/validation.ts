@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { SCHOOL_LEVELS, SUBJECTS_BY_LEVEL, YEARS_BY_LEVEL } from "./catalog";
+import { REFERENCE_PATTERN } from "./reference";
 
 /**
  * The server boundary. Anything that arrives from a URL or a form comes
@@ -101,6 +102,22 @@ export const bookingInputSchema = z
 export const paymentOutcomeSchema = z.enum(["success", "failure"]);
 
 export type PaymentOutcome = z.infer<typeof paymentOutcomeSchema>;
+
+/**
+ * A booking reference out of a URL. Uppercased first, so a parent who types
+ * theirs in lower case still lands on their booking, and shape-checked before
+ * it ever reaches a query.
+ */
+export const referenceSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .pipe(z.string().regex(REFERENCE_PATTERN, "That is not a booking reference."));
+
+export function parseReference(input: unknown): string | null {
+  const result = referenceSchema.safeParse(input);
+  return result.success ? result.data : null;
+}
 
 export type Selection = z.infer<typeof selectionSchema>;
 export type BookingSelection = z.infer<typeof bookingSelectionSchema>;

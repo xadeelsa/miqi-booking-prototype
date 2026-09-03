@@ -1,6 +1,11 @@
 "use server";
 
-import { createBooking, UNAVAILABLE_MESSAGES } from "@/lib/booking";
+import { redirect } from "next/navigation";
+import {
+  confirmationHref,
+  createBooking,
+  UNAVAILABLE_MESSAGES,
+} from "@/lib/booking";
 import { clearDetailsDraft, readDetailsDraft } from "@/lib/draft";
 import { chargeCard } from "@/lib/payment";
 import {
@@ -11,7 +16,6 @@ import {
 
 export type PaymentState = {
   error?: string;
-  booked?: { reference: string; priceCents: number };
 };
 
 /**
@@ -66,9 +70,9 @@ export async function payAndBook(
     return { error: UNAVAILABLE_MESSAGES[result.reason] };
   }
 
+  // Dropped before the redirect, so the contact details don't outlive the
+  // funnel — from here on the Booking row is the record.
   await clearDetailsDraft();
 
-  return {
-    booked: { reference: result.reference, priceCents: result.priceCents },
-  };
+  redirect(confirmationHref(result.reference));
 }
