@@ -7,42 +7,19 @@ import {
   loadBookingContext,
   slotsHref,
   UNAVAILABLE_MESSAGES,
-  type BookingSelection,
 } from "@/lib/booking";
-import { isValidLevel, isValidSubject, isValidYear } from "@/lib/catalog";
 import { readDetailsDraft } from "@/lib/draft";
 import { formatDateTime, formatPrice } from "@/lib/format";
-
-type Params = {
-  service?: string;
-  level?: string;
-  year?: string;
-  subject?: string;
-  slot?: string;
-};
+import { parseBookingSelection } from "@/lib/validation";
 
 export default async function DetailsPage({
   searchParams,
 }: {
-  searchParams: Promise<Params>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { service, level, year, subject, slot } = await searchParams;
+  const selection = parseBookingSelection(await searchParams);
+  if (!selection) notFound();
 
-  if (!service || !level || !year || !subject || !slot) notFound();
-  if (!isValidLevel(level)) notFound();
-  if (!isValidYear(level, year)) notFound();
-  if (!isValidSubject(level, subject)) notFound();
-
-  const slotId = Number(slot);
-  if (!Number.isSafeInteger(slotId) || slotId < 1) notFound();
-
-  const selection: BookingSelection = {
-    service,
-    level,
-    year,
-    subject,
-    slot: slotId,
-  };
   const context = await loadBookingContext(selection);
 
   if (!context.ok) {
@@ -68,7 +45,7 @@ export default async function DetailsPage({
       <Stepper current={4} />
       <h1 className="text-xl font-semibold tracking-tight">Your details</h1>
       <p className="mt-2 text-sm text-muted">
-        {context.service.name} · {year} · {subject} ·{" "}
+        {context.service.name} · {selection.year} · {selection.subject} ·{" "}
         {formatDateTime(context.slot.startsAt)} —{" "}
         <span className="text-ink">{formatPrice(context.priceCents)}</span>
       </p>

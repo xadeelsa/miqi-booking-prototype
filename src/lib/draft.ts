@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { detailsSchema, type BookingDetails } from "./validation";
 
 /**
  * The parent's contact details, parked between the details form and the review
@@ -17,34 +18,19 @@ import { cookies } from "next/headers";
 const COOKIE = "miqi_booking_details";
 const MAX_AGE_SECONDS = 60 * 30;
 
-export type BookingDetails = {
-  parentName: string;
-  parentEmail: string;
-  parentPhone?: string;
-  studentName: string;
-};
-
-function isBookingDetails(value: unknown): value is BookingDetails {
-  if (typeof value !== "object" || value === null) return false;
-  const draft = value as Record<string, unknown>;
-  return (
-    typeof draft.parentName === "string" &&
-    typeof draft.parentEmail === "string" &&
-    typeof draft.studentName === "string" &&
-    (draft.parentPhone === undefined || typeof draft.parentPhone === "string")
-  );
-}
-
+/**
+ * The cookie is client-supplied like anything else, so it goes through the
+ * same schema as the form. A tampered or stale draft is treated as no draft:
+ * the parent is sent back to the form rather than shown an error page.
+ */
 export async function readDetailsDraft(): Promise<BookingDetails | null> {
   const raw = (await cookies()).get(COOKIE)?.value;
   if (!raw) return null;
 
   try {
-    const parsed: unknown = JSON.parse(raw);
-    return isBookingDetails(parsed) ? parsed : null;
+    const result = detailsSchema.safeParse(JSON.parse(raw));
+    return result.success ? result.data : null;
   } catch {
-    // A malformed cookie is indistinguishable from no cookie: the parent gets
-    // sent back to the form rather than an error page.
     return null;
   }
 }

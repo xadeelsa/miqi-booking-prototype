@@ -1,7 +1,9 @@
 // Single source of truth for the (fictitious) selection options a parent picks
 // during booking: school level, year, and subject. These are CAPTURED on a
-// booking, not stored as database tables — so they live here as constants and
-// are validated at the server boundary (see src/lib/validation.ts).
+// booking, not stored as database tables — so they live here as constants.
+//
+// This module only describes what exists. Deciding whether an incoming
+// combination is valid is src/lib/validation.ts's job.
 
 export const SCHOOL_LEVELS = [
   "BASISSCHOOL",
@@ -34,15 +36,3 @@ export const SUBJECTS_BY_LEVEL: Record<SchoolLevel, string[]> = {
   HAVO: ["Wiskunde", "Nederlands", "Engels", "Natuurkunde", "Scheikunde", "Biologie", "Economie"],
   VWO: ["Wiskunde", "Nederlands", "Engels", "Natuurkunde", "Scheikunde", "Biologie", "Economie", "Geschiedenis"],
 };
-
-export function isValidLevel(value: string): value is SchoolLevel {
-  return (SCHOOL_LEVELS as readonly string[]).includes(value);
-}
-
-export function isValidYear(level: SchoolLevel, year: string): boolean {
-  return YEARS_BY_LEVEL[level].includes(year);
-}
-
-export function isValidSubject(level: SchoolLevel, subject: string): boolean {
-  return SUBJECTS_BY_LEVEL[level].includes(subject);
-}

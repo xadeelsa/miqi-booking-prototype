@@ -3,30 +3,21 @@ import { notFound } from "next/navigation";
 import { Stepper } from "@/components/Stepper";
 import { getAvailableSlots, getServiceBySlug } from "@/lib/queries";
 import { dayKey, formatDayLong, formatPrice, formatTime } from "@/lib/format";
-import { isValidLevel, isValidSubject, isValidYear } from "@/lib/catalog";
-
-type Params = {
-  service?: string;
-  level?: string;
-  year?: string;
-  subject?: string;
-};
+import { parseSelection } from "@/lib/validation";
 
 export default async function ChooseSlotPage({
   searchParams,
 }: {
-  searchParams: Promise<Params>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { service: slug, level, year, subject } = await searchParams;
-
   // Server-side validation of every incoming parameter. The dropdowns on the
   // previous step are UX only — this is the gate.
-  if (!slug || !level || !year || !subject) notFound();
-  if (!isValidLevel(level)) notFound();
-  if (!isValidYear(level, year)) notFound();
-  if (!isValidSubject(level, subject)) notFound();
+  const selection = parseSelection(await searchParams);
+  if (!selection) notFound();
 
-  const service = await getServiceBySlug(slug);
+  const { level, year, subject } = selection;
+
+  const service = await getServiceBySlug(selection.service);
   if (!service) notFound();
 
   const slots = await getAvailableSlots();

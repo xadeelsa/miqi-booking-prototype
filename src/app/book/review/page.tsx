@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
+import { ConfirmForm } from "@/components/ConfirmForm";
 import { Stepper } from "@/components/Stepper";
 import { Card } from "@/components/ui/Card";
 import { Note } from "@/components/ui/Note";
@@ -9,24 +10,12 @@ import {
   selectionQuery,
   slotsHref,
   UNAVAILABLE_MESSAGES,
-  type BookingSelection,
 } from "@/lib/booking";
-import {
-  isValidLevel,
-  isValidSubject,
-  isValidYear,
-  SCHOOL_LEVEL_LABELS,
-} from "@/lib/catalog";
+import { SCHOOL_LEVEL_LABELS } from "@/lib/catalog";
 import { readDetailsDraft } from "@/lib/draft";
 import { formatDateTime, formatPrice } from "@/lib/format";
-
-type Params = {
-  service?: string;
-  level?: string;
-  year?: string;
-  subject?: string;
-  slot?: string;
-};
+import { parseBookingSelection } from "@/lib/validation";
+import { confirmBooking } from "./actions";
 
 function Row({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -40,25 +29,11 @@ function Row({ label, value }: { label: string; value: ReactNode }) {
 export default async function ReviewPage({
   searchParams,
 }: {
-  searchParams: Promise<Params>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { service, level, year, subject, slot } = await searchParams;
+  const selection = parseBookingSelection(await searchParams);
+  if (!selection) notFound();
 
-  if (!service || !level || !year || !subject || !slot) notFound();
-  if (!isValidLevel(level)) notFound();
-  if (!isValidYear(level, year)) notFound();
-  if (!isValidSubject(level, subject)) notFound();
-
-  const slotId = Number(slot);
-  if (!Number.isSafeInteger(slotId) || slotId < 1) notFound();
-
-  const selection: BookingSelection = {
-    service,
-    level,
-    year,
-    subject,
-    slot: slotId,
-  };
   const context = await loadBookingContext(selection);
 
   if (!context.ok) {
@@ -99,9 +74,9 @@ export default async function ReviewPage({
       <Card className="mt-6">
         <dl className="divide-y divide-line text-sm">
           <Row label="Service" value={context.service.name} />
-          <Row label="Level" value={SCHOOL_LEVEL_LABELS[level]} />
-          <Row label="Year" value={year} />
-          <Row label="Subject" value={subject} />
+          <Row label="Level" value={SCHOOL_LEVEL_LABELS[selection.level]} />
+          <Row label="Year" value={selection.year} />
+          <Row label="Subject" value={selection.subject} />
           <Row label="Time" value={formatDateTime(context.slot.startsAt)} />
           <Row label="Parent / guardian" value={details.parentName} />
           <Row label="Student" value={details.studentName} />
@@ -120,10 +95,7 @@ export default async function ReviewPage({
         </dl>
       </Card>
 
-      <Note className="mt-6">
-        This time is held for nobody until payment succeeds — the booking is
-        created at the payment step.
-      </Note>
+      <ConfirmForm action={confirmBooking.bind(null, selection)} />
 
       <div className="mt-6 flex gap-4 text-sm">
         <Link href={detailsHref} className="text-muted underline hover:text-ink">

@@ -1,18 +1,5 @@
-import type { SchoolLevel } from "./catalog";
 import { getServiceBySlug, getSlotById } from "./queries";
-
-/**
- * Everything the parent picked in steps 1–3, carried in the URL. Every value
- * here arrives from the client, so it is untrusted until it has been resolved
- * against the database by `loadBookingContext`.
- */
-export type BookingSelection = {
-  service: string;
-  level: SchoolLevel;
-  year: string;
-  subject: string;
-  slot: number;
-};
+import type { BookingSelection } from "./validation";
 
 export type UnavailableReason = "service" | "slot" | "taken" | "past";
 
