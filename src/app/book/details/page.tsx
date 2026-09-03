@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { DetailsForm } from "@/components/DetailsForm";
 import { StepUnavailable } from "@/components/StepUnavailable";
-import { Stepper } from "@/components/Stepper";
 import { BackLink } from "@/components/ui/BackLink";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -22,7 +21,6 @@ export default async function DetailsPage({
   if (step.status === "unavailable") {
     return (
       <StepUnavailable
-        step={4}
         title={TITLE}
         reason={step.reason}
         backHref={slotsHref(step.selection)}
@@ -34,10 +32,9 @@ export default async function DetailsPage({
 
   return (
     <div>
-      <Stepper current={4} />
       <PageHeader title={TITLE}>
         {service.name} · {selection.year} · {selection.subject} ·{" "}
-        {formatDateTime(slot.startsAt)} —{" "}
+        {formatDateTime(slot.startsAt)} -{" "}
         <span className="text-ink">{formatPrice(priceCents)}</span>
       </PageHeader>
 

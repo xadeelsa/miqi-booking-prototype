@@ -17,7 +17,7 @@ import {
  *
  * It lives apart from `booking.ts` on purpose. Reading the draft touches
  * `next/headers`, and pulling that into the booking domain would drag a
- * request context into `createBooking` — which is a plain database function
+ * request context into `createBooking` - which is a plain database function
  * that the tests import directly.
  *
  * `details` is deliberately nullable rather than enforced here: the details

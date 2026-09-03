@@ -5,7 +5,7 @@ import { detailsSchema, type BookingDetails } from "./validation";
  * The parent's contact details, parked between the details form and the review
  * page.
  *
- * The rest of the funnel keeps its state in the URL, which is deliberate — it
+ * The rest of the funnel keeps its state in the URL, which is deliberate - it
  * makes every step shareable, refreshable and server-rendered with no client
  * state to hydrate. Contact details are the one thing that must not live
  * there: a name, an email and a phone number in a query string end up in
@@ -47,7 +47,7 @@ export async function saveDetailsDraft(details: BookingDetails): Promise<void> {
 
 /**
  * Dropped as soon as the booking exists, so the contact details don't outlive
- * the funnel that needed them — from then on the Booking row is the record.
+ * the funnel that needed them - from then on the Booking row is the record.
  */
 export async function clearDetailsDraft(): Promise<void> {
   (await cookies()).delete({ name: COOKIE, path: "/book" });

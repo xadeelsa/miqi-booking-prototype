@@ -3,7 +3,7 @@ import { PrismaClient, type SchoolLevel } from "@prisma/client";
 const db = new PrismaClient();
 
 // Fictitious tutoring services (prices in cents).
-// Service names stay in Dutch — they are the client's real product names.
+
 const services = [
   {
     slug: "bijles-1op1",
@@ -27,7 +27,7 @@ const services = [
 
 // A couple of example bookings so a fresh clone has something to look at:
 // /admin is populated immediately, and these slots visibly disappear from the
-// available list — the anti-double-booking guarantee demonstrating itself.
+// available list. The anti-double-booking guarantee demonstrating itself.
 const exampleBookings: {
   reference: string;
   serviceSlug: string;
@@ -67,7 +67,7 @@ const exampleBookings: {
 ];
 
 // Generate a fixed set of static availability slots: the next ~15 weekdays,
-// afternoons at 14:00–18:00 UTC (≈ after-school in the Netherlands), 60 min each.
+// afternoons at 14:00-18:00 UTC (≈ after-school in the Netherlands), 60 min each.
 function generateSlots(): { startsAt: Date; endsAt: Date }[] {
   const slots: { startsAt: Date; endsAt: Date }[] = [];
   const startHoursUtc = [14, 15, 16, 17, 18];

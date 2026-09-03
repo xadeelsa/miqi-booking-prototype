@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Form from "next/form";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Select } from "@/components/ui/Select";
@@ -14,10 +15,10 @@ import {
 
 /**
  * Client component only because the year/subject options depend on the chosen
- * level. Submission is a plain GET form to /book/slots, so the resulting state
- * lives in the URL and the next step stays a Server Component.
+ * level. Submission is a GET to /book/slots via next/form so the stepper can
+ * stay mounted and animate; the resulting state still lives in the URL.
  *
- * Level, year and subject names stay in Dutch — they are the real names of the
+ * Level, year and subject names stay in Dutch - they are the real names of the
  * Dutch school system and don't have meaningful English equivalents.
  */
 export function LevelPicker({ serviceSlug }: { serviceSlug: string }) {
@@ -29,7 +30,7 @@ export function LevelPicker({ serviceSlug }: { serviceSlug: string }) {
   const placeholder = level ? "Make a choice" : "Choose a level first";
 
   return (
-    <form action="/book/slots" method="get" className="space-y-5">
+    <Form action="/book/slots" className="space-y-5">
       <input type="hidden" name="service" value={serviceSlug} />
 
       <Field label="School level">
@@ -71,6 +72,6 @@ export function LevelPicker({ serviceSlug }: { serviceSlug: string }) {
       </Field>
 
       <Button type="submit">View available times</Button>
-    </form>
+    </Form>
   );
 }

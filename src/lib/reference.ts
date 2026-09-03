@@ -5,7 +5,7 @@ import { randomInt } from "node:crypto";
  *
  * Parents read these out over the phone, so the alphabet drops the characters
  * that get misheard or mistyped: no 0/O, no 1/I/L, no U (which is heard as V).
- * That leaves 30 symbols and 30^5 ≈ 24 million codes — short enough to dictate,
+ * That leaves 30 symbols and 30^5 ≈ 24 million codes - short enough to dictate,
  * and sparse enough that collisions are rare.
  *
  * Rare, though, is not never, and the reference column is UNIQUE. Callers are

@@ -9,7 +9,7 @@ const raleway = Raleway({
 });
 
 export const metadata: Metadata = {
-  title: "MIQI Huiswerkbegeleiding — Book a session",
+  title: "MIQI Huiswerkbegeleiding - Book a session",
   description:
     "Prototype booking system for MIQI Huiswerkbegeleiding: book tutoring, homework guidance or exam training.",
 };

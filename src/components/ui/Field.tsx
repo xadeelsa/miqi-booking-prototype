@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cx } from "./styles";
 
 /**
- * Wraps the control in its `<label>`, so the two are associated natively — no
+ * Wraps the control in its `<label>`, so the two are associated natively - no
  * id/htmlFor pair to keep in sync. `error` sits inside the label too, which is
  * why it needs no aria-describedby.
  */

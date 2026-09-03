@@ -8,13 +8,13 @@ import { formatDateTime, formatPrice } from "@/lib/format";
 import type { getBookingsForAdmin } from "@/lib/queries";
 
 /**
- * A booking list is never allowed to be a snapshot from build time — it is
+ * A booking list is never allowed to be a snapshot from build time - it is
  * the one page whose entire value is being current. Nothing else in the app
  * declares this yet, which is worth a look before any production deploy.
  */
 export const dynamic = "force-dynamic";
 
-export const metadata = { title: "Bookings — MIQI admin" };
+export const metadata = { title: "Bookings - MIQI admin" };
 
 type AdminBooking = Awaited<ReturnType<typeof getBookingsForAdmin>>[number];
 
@@ -40,7 +40,7 @@ function BookingRow({ booking }: { booking: AdminBooking }) {
       </p>
 
       <p className="mt-1 text-muted">
-        {booking.studentName} — booked by {booking.parentName} (
+        {booking.studentName}, booked by {booking.parentName} (
         <a
           href={`mailto:${booking.parentEmail}`}
           className="underline hover:text-ink"
@@ -102,7 +102,7 @@ export default async function AdminPage() {
       </p>
 
       <Note className="mt-6">
-        This view is unauthenticated in the prototype — anyone who knows the
+        This view is unauthenticated in the prototype. Anyone who knows the
         URL can read every parent&apos;s contact details. It is the first thing
         that would sit behind a login.
       </Note>

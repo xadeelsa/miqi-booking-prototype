@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "supwriter": {
+      "url": "https://supwriter.com/api/mcp",
+      "headers": { "Authorization": "Bearer sw_live_your_key" }
+    }
+  }
+}

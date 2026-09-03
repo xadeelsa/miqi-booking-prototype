@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { StepUnavailable } from "@/components/StepUnavailable";
-import { Stepper } from "@/components/Stepper";
 import { buttonClass } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -33,7 +32,6 @@ export default async function ReviewPage({
   if (step.status === "unavailable") {
     return (
       <StepUnavailable
-        step={5}
         title={TITLE}
         reason={step.reason}
         backHref={slotsHref(step.selection)}
@@ -43,13 +41,12 @@ export default async function ReviewPage({
 
   const { selection, service, slot, priceCents, details } = step;
 
-  // No draft means a direct link or an expired cookie — send the parent to the
+  // No draft means a direct link or an expired cookie - send the parent to the
   // form rather than showing half a summary.
   if (!details) redirect(detailsHref(selection));
 
   return (
     <div>
-      <Stepper current={5} />
       <PageHeader title={TITLE}>
         Please check everything before you pay.
       </PageHeader>

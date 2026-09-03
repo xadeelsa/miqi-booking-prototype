@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 /**
  * Mock mailer, shaped like Resend on purpose.
  *
- * The request and response mirror `resend.emails.send` — `to` as an array,
+ * The request and response mirror `resend.emails.send` - `to` as an array,
  * `html`/`text` alongside each other, and a `{ data, error }` envelope rather
  * than a thrown exception. Swapping the mock for the real client is then an
  * import and an API key, not a refactor of every caller.
@@ -38,7 +38,7 @@ export async function sendEmail(
   console.info(
     [
       rule,
-      "MOCK EMAIL — not delivered (no provider configured)",
+      "MOCK EMAIL - not delivered (no provider configured)",
       `from:    ${request.from}`,
       `to:      ${request.to.join(", ")}`,
       `subject: ${request.subject}`,

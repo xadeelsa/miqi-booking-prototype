@@ -6,7 +6,7 @@ import { formatDateTime, formatPrice } from "../format";
 
 /**
  * Built from the stored Booking rather than from the funnel's state, so what
- * a parent is told matches what was actually recorded — including the price,
+ * a parent is told matches what was actually recorded - including the price,
  * which is the snapshot taken at booking time.
  *
  * Structural type rather than Prisma's, so this stays testable without a
@@ -60,7 +60,7 @@ export function bookingConfirmationEmail(
     "",
     `Reference: ${booking.reference}`,
     `Service:   ${booking.service.name}`,
-    `For:       ${level}, ${booking.year} — ${booking.subject}`,
+    `For:       ${level}, ${booking.year}, ${booking.subject}`,
     `When:      ${when}`,
     `Paid:      ${price}`,
     "",
@@ -76,7 +76,7 @@ export function bookingConfirmationEmail(
   return {
     from: EMAIL_FROM,
     to: [booking.parentEmail],
-    subject: `Booking confirmed — ${booking.reference}`,
+    subject: `Booking confirmed - ${booking.reference}`,
     text: lines.join("\n"),
     html: `
       <div style="font-family:system-ui,sans-serif;color:#2f3337;line-height:1.5">
@@ -85,7 +85,7 @@ export function bookingConfirmationEmail(
         <table cellpadding="0" cellspacing="0" style="font-size:14px">
           <tr><td style="padding:2px 16px 2px 0;color:#5f6a70">Reference</td><td><strong>${booking.reference}</strong></td></tr>
           <tr><td style="padding:2px 16px 2px 0;color:#5f6a70">Service</td><td>${serviceName}</td></tr>
-          <tr><td style="padding:2px 16px 2px 0;color:#5f6a70">For</td><td>${level}, ${booking.year} &mdash; ${subject}</td></tr>
+          <tr><td style="padding:2px 16px 2px 0;color:#5f6a70">For</td><td>${level}, ${booking.year}, ${subject}</td></tr>
           <tr><td style="padding:2px 16px 2px 0;color:#5f6a70">When</td><td>${when}</td></tr>
           <tr><td style="padding:2px 16px 2px 0;color:#5f6a70">Paid</td><td>${price}</td></tr>
         </table>

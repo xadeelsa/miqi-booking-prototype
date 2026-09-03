@@ -1,12 +1,12 @@
-// MIQI Booking — Prisma schema
+// MIQI Booking - Prisma schema
 //
 // Design notes (see README > Architecture):
 //  - Service and Slot are seeded reference data.
 //  - Slots are a single tutor/resource's static availability (one calendar).
 //  - schoolLevel/year/subject are CAPTURED fields on a booking, not join tables
-//    — they don't drive availability, they're just recorded. Their option lists
+//    - they don't drive availability, they're just recorded. Their option lists
 //    live in src/lib/catalog.ts (validated by Zod), not in the database.
-//  - Booking.slotId is UNIQUE — this single constraint is the entire
+//  - Booking.slotId is UNIQUE - this single constraint is the entire
 //    anti-double-booking guarantee. The database structurally cannot hold two
 //    bookings for the same slot.
 //  - Booking.priceCents is copied from the Service at booking time, so a later

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Stepper } from "@/components/Stepper";
 import { Note } from "@/components/ui/Note";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getActiveServices } from "@/lib/queries";
@@ -10,7 +9,6 @@ export default async function ChooseServicePage() {
 
   return (
     <div>
-      <Stepper current={1} />
       <PageHeader title="Choose a service">
         What would you like help with?
       </PageHeader>

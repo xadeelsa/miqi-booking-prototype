@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { LevelPicker } from "@/components/LevelPicker";
-import { Stepper } from "@/components/Stepper";
 import { BackLink } from "@/components/ui/BackLink";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -21,9 +20,8 @@ export default async function ChooseLevelPage({
 
   return (
     <div>
-      <Stepper current={2} />
       <PageHeader title="Level, year and subject">
-        Selected service: <span className="text-ink">{service.name}</span> —{" "}
+        Selected service: <span className="text-ink">{service.name}</span> -{" "}
         {formatPrice(service.priceCents)}
       </PageHeader>
 

@@ -8,7 +8,7 @@ import { formatPrice } from "@/lib/format";
 const INITIAL: PaymentState = {};
 
 /**
- * Two submit buttons in one form, distinguished by their `value` — the
+ * Two submit buttons in one form, distinguished by their `value` - the
  * clicked button's value is what reaches the action, so the decline path is
  * reachable without a radio group nobody would use.
  */

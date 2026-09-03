@@ -13,14 +13,14 @@ import {
  * when the winner is decided by microseconds rather than by turn-taking.
  *
  * These tests talk to a real Postgres deliberately. The protection is a UNIQUE
- * constraint, which is a database feature — a mocked Prisma would only prove
+ * constraint, which is a database feature - a mocked Prisma would only prove
  * that the mock does what the test told it to.
  */
 
 const CONCURRENT_ATTEMPTS = 10;
 const DISTINCT_SLOTS = 20;
 
-// Matches the reference alphabet: digits 2–9 and letters minus I, L, O and U.
+// Matches the reference alphabet: digits 2-9 and letters minus I, L, O and U.
 const REFERENCE_PATTERN = /^MIQI-[2-9A-HJKMNP-TV-Z]{5}$/;
 
 beforeEach(resetFixtures);
@@ -73,7 +73,7 @@ describe("createBooking", () => {
     const input = bookingInputFor(service.slug, slot.id);
 
     // Each attempt checks availability before writing, and right now the slot
-    // is free — so the check waves all ten of them through. Nothing but the
+    // is free - so the check waves all ten of them through. Nothing but the
     // unique constraint stands between them and ten bookings for one hour of
     // one tutor's time.
     const results = await Promise.all(
@@ -91,7 +91,7 @@ describe("createBooking", () => {
       Array(CONCURRENT_ATTEMPTS - 1).fill("taken"),
     );
 
-    // And the part that actually matters — the database agrees.
+    // And the part that actually matters - the database agrees.
     expect(await db.booking.count({ where: { slotId: slot.id } })).toBe(1);
   });
 

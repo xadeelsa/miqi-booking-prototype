@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { PaymentForm } from "@/components/PaymentForm";
 import { StepUnavailable } from "@/components/StepUnavailable";
-import { Stepper } from "@/components/Stepper";
 import { BackLink } from "@/components/ui/BackLink";
 import { Card } from "@/components/ui/Card";
 import { Note } from "@/components/ui/Note";
@@ -24,7 +23,6 @@ export default async function PaymentPage({
   if (step.status === "unavailable") {
     return (
       <StepUnavailable
-        step={6}
         title={TITLE}
         reason={step.reason}
         backHref={slotsHref(step.selection)}
@@ -37,7 +35,6 @@ export default async function PaymentPage({
 
   return (
     <div>
-      <Stepper current={6} />
       <PageHeader title={TITLE}>
         {service.name} · {formatDateTime(slot.startsAt)} for{" "}
         {details.studentName}
@@ -55,7 +52,7 @@ export default async function PaymentPage({
 
       <Note className="mt-4">
         No payment provider is connected in this prototype. Both outcomes below
-        are simulated so the decline path can be demonstrated on demand — your
+        are simulated so the decline path can be demonstrated on demand. Your
         booking is only created if the payment succeeds.
       </Note>
 

@@ -3,7 +3,7 @@
 @theme inline {
   /* Brand */
   --font-sans: var(--font-raleway, ui-sans-serif, system-ui, sans-serif);
-  --color-brand: #226e90; /* button fill — 5.0:1 with white */
+  --color-brand: #226e90; /* button fill - 5.0:1 with white */
   --color-brand-strong: #1a576f; /* hover / pressed */
   --color-brand-soft: #308ab0; /* MIQI blue, verbatim */
   --color-brand-tint: #e7f2f7;

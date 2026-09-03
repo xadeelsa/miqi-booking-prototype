@@ -22,7 +22,7 @@ export type PaymentState = {
 };
 
 /**
- * Charge, then book — the order create-on-pay demands.
+ * Charge, then book - the order create-on-pay demands.
  *
  * The selection is a bound (encrypted) action argument rather than hidden
  * inputs, since this page has nothing editable on it, and it still goes back
@@ -59,7 +59,7 @@ export async function payAndBook(
     // create-on-pay: the slot is still free, for this parent to retry or for
     // anyone else to take. It also means a Booking row only ever exists in the
     // PAID state, so PaymentStatus.PENDING and FAILED are currently
-    // unreachable — recording attempts would need a separate table that
+    // unreachable - recording attempts would need a separate table that
     // doesn't hold a slot (noted in the README's limitations).
     return { error: payment.message };
   }
@@ -69,12 +69,12 @@ export async function payAndBook(
     // Paid, but lost the slot in the gap between charging and inserting. The
     // simulated charge is instant so the window is nil here, but against a
     // real provider this is the branch that has to void or refund before
-    // reporting back — the one cost of charging before writing.
+    // reporting back - the one cost of charging before writing.
     return { error: UNAVAILABLE_MESSAGES[result.reason] };
   }
 
   // Dropped before the redirect, so the contact details don't outlive the
-  // funnel — from here on the Booking row is the record.
+  // funnel - from here on the Booking row is the record.
   await clearDetailsDraft();
 
   await sendConfirmationEmail(result.reference);

@@ -6,7 +6,7 @@ import { SCHOOL_LEVEL_LABELS, type SchoolLevel } from "./catalog";
  * Apple Calendar, Outlook and anything else that speaks RFC 5545.
  *
  * Both are built from the stored Booking, and both emit times in UTC. Slot
- * times are stored as instants, so UTC is exact — and it sidesteps having to
+ * times are stored as instants, so UTC is exact - and it sidesteps having to
  * ship a VTIMEZONE block for Europe/Amsterdam just to say the same thing.
  *
  * Structural input type, so this needs no database to test and doesn't care
@@ -24,7 +24,7 @@ export type CalendarBooking = {
 };
 
 /**
- * Slots carry no location — there is one tutor and one calendar in this
+ * Slots carry no location - there is one tutor and one calendar in this
  * prototype. A real schema would hang this off the slot or the tutor.
  */
 const LOCATION = "MIQI Huiswerkbegeleiding, Amsterdam";
@@ -33,7 +33,7 @@ const LOCATION = "MIQI Huiswerkbegeleiding, Amsterdam";
 const UID_DOMAIN = "miqi.example";
 
 function summaryFor(booking: CalendarBooking): string {
-  return `${booking.service.name} — ${booking.subject}`;
+  return `${booking.service.name} - ${booking.subject}`;
 }
 
 function descriptionFor(booking: CalendarBooking): string {
@@ -78,7 +78,7 @@ const MAX_OCTETS = 75;
 /**
  * RFC 5545 §3.1: no line may exceed 75 octets, and continuations start with a
  * single space. The limit is octets rather than characters, which matters as
- * soon as a Dutch name brings a multi-byte character with it — so this counts
+ * soon as a Dutch name brings a multi-byte character with it - so this counts
  * UTF-8 bytes and iterates by code point, never splitting one in half.
  */
 function foldLine(line: string): string {
@@ -128,6 +128,6 @@ export function bookingIcs(booking: CalendarBooking): string {
     "END:VCALENDAR",
   ];
 
-  // CRLF throughout, including a trailing one — some parsers are strict.
+  // CRLF throughout, including a trailing one - some parsers are strict.
   return `${lines.map(foldLine).join("\r\n")}\r\n`;
 }

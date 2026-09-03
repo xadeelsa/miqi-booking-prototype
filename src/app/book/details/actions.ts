@@ -56,7 +56,7 @@ export async function saveDetails(
     return {
       values,
       errors,
-      // Nothing on this form can fix a bad service, level or slot — that needs
+      // Nothing on this form can fix a bad service, level or slot - that needs
       // a step back, so it is reported separately from the field errors.
       formError: selectionBroken
         ? "Your earlier choices are no longer valid. Please pick a service and time again."
