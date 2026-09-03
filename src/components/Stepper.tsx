@@ -38,6 +38,8 @@ export function Stepper({ current }: { current: number }) {
               className="flex items-center gap-1.5"
               aria-current={state === "current" ? "step" : undefined}
             >
+              <span
+                className={[
                   "flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold",
                   state === "current"
                     ? "bg-accent text-white"

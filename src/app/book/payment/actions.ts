@@ -7,7 +7,10 @@ import {
   UNAVAILABLE_MESSAGES,
 } from "@/lib/booking";
 import { clearDetailsDraft, readDetailsDraft } from "@/lib/draft";
+import { sendEmail } from "@/lib/email";
+import { bookingConfirmationEmail } from "@/lib/emails/booking-confirmation";
 import { chargeCard } from "@/lib/payment";
+import { getBookingByReference } from "@/lib/queries";
 import {
   bookingInputSchema,
   paymentOutcomeSchema,
@@ -74,5 +77,22 @@ export async function payAndBook(
   // funnel — from here on the Booking row is the record.
   await clearDetailsDraft();
 
+  await sendConfirmationEmail(result.reference);
+
   redirect(confirmationHref(result.reference));
+}
+
+/**
+ * Best effort, and deliberately after the booking is safely stored: the
+ * session is paid for either way, so a mail failure must not present itself
+ * as a failed booking. Awaiting it inline keeps the prototype's log readable;
+ * a real system would hand this to a queue with retries.
+ */
+async function sendConfirmationEmail(reference: string): Promise<void> {
+  try {
+    const booking = await getBookingByReference(reference);
+    if (booking) await sendEmail(bookingConfirmationEmail(booking));
+  } catch (error) {
+    console.error(`Confirmation email failed for ${reference}`, error);
+  }
 }
