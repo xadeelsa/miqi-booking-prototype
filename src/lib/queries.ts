@@ -38,3 +38,18 @@ export function getBookingByReference(reference: string) {
     include: { service: true, slot: true },
   });
 }
+
+/**
+ * Every booking, soonest session first, for the admin list.
+ *
+ * Deliberately unbounded: a prototype's whole dataset is a screenful, and
+ * pretending otherwise would mean pagination nobody can exercise. The point
+ * at which this needs a cursor and a SQL-side total is the point at which it
+ * needs a date filter and a search box too.
+ */
+export function getBookingsForAdmin() {
+  return db.booking.findMany({
+    include: { service: true, slot: true },
+    orderBy: { slot: { startsAt: "asc" } },
+  });
+}
