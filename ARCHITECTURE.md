@@ -4,7 +4,7 @@ Short overview of how the booking prototype is put together.
 
 ## Shape
 
-One Next.js App Router app. Pages render on the server, mutations go through server actions, Postgres is reached via Prisma. There is no separate API.
+One Next.js App Router app. Pages render on the server, mutations go through server actions, Postgres is reached via Prisma. There's no API layer; the only route handler in the app serves the `.ics` file, because a download isn't a page.
 
 ```
 Browser
@@ -13,8 +13,10 @@ Browser
 
 Next.js
   src/app/book/     funnel pages + server actions
-  src/lib/          booking, validation, payment, email, calendar
+  src/app/admin/    bookings list
+  src/lib/          booking, funnel, validation, payment, email, calendar
   src/components/   UI
+  tests/            Postgres-backed, no mocks
 
 Postgres
   Service, Slot, Booking
@@ -33,7 +35,7 @@ Postgres
 6. **Payment** - `payAndBook` charges, then inserts. Decline writes nothing. Success creates a `PAID` row.
 7. **Confirmation** - `/book/confirmation/[reference]`. Email is logged (not sent). Calendar is a Google link plus an `.ics` download, both built from the stored booking.
 
-From details onward, every page re-parses the query string, reloads the service and slot, and re-prices. If the time went while the parent was on the form, they get a normal "that time is gone" message, not a 500.
+From details onward, every page runs the same preamble through `resolveFunnelStep`: re-parse the query string, reload the service and slot, re-price, and pick up the contact details. So if the time goes while a parent is filling in the form, they get a normal "that time is gone" message, not a 500. The contact details come back nullable rather than guaranteed, which is what stops a later step using them without deciding what to do when they're missing.
 
 Selection lives in the URL so refresh works and pages stay server-rendered. Names, email and phone stay in the cookie so they don't leak into history or logs. The price is never in the request.
 
@@ -43,7 +45,7 @@ Checking availability is a read. Any read-then-write leaves a gap, so the applic
 
 `Booking.slotId` is unique. Two rows for the same hour cannot be stored. `createBooking` treats a unique-constraint violation on `slotId` as `{ ok: false, reason: "taken" }` - an expected outcome, not an exception. A collision on the reference code is retried with a new code.
 
-`tests/double-booking.test.ts` fires ten inserts at the same slot against real Postgres. Exactly one succeeds.
+`tests/double-booking.test.ts` fires ten inserts at the same slot against real Postgres. Exactly one succeeds. A second test books twenty different slots at once and expects all twenty, because a constraint that rejected everything after the first booking would pass the first test just as happily.
 
 There are no holds. A booking row exists only after payment. Abandoned forms don't occupy slots. The cost is that two people can reach Pay for the same time; the constraint decides.
 
@@ -60,3 +62,5 @@ A declined charge writes nothing. Mail is sent after the row is committed; if it
 ## Admin
 
 `/admin` lists every booking, split into upcoming and past, with a running total. It is unauthenticated in this prototype. The page is `force-dynamic` so it never serves a cached snapshot.
+
+The upcoming-versus-past split sits in `src/lib/admin.ts` rather than in the page. Reading the clock during render is the kind of impurity a component shouldn't have, and moving it out made the boundary injectable, so "a session starting this instant counts as upcoming" is a test rather than a hope.

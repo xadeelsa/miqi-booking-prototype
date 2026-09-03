@@ -68,20 +68,6 @@ const REFERENCE_ATTEMPTS = 5;
  * sweeping up abandoned holds. The cost is that two parents can both reach the
  * pay button for the same slot; the benefit is that a slot is never silently
  * unavailable because somebody wandered off mid-funnel.
- *
- * **Why the unique constraint is the guarantee.** `loadBookingContext` reads
- * availability, and every read-then-write leaves a window in between. Widening
- * that read into a transaction, or a `SELECT ... FOR UPDATE`, or an
- * application-level lock, all reduce to trusting application code to serialise
- * something the database can simply refuse: `Booking.slotId` is UNIQUE, so a
- * second row for the same slot is not merely unlikely, it is unrepresentable.
- * Concurrency is therefore handled by *interpreting the rejection* rather than
- * by trying to avoid it — a losing insert is an expected outcome, not a fault,
- * so it comes back as `reason: "taken"` instead of throwing.
- *
- * The pre-check is kept anyway: it prices the booking and it gives a parent a
- * useful message in the ordinary case, where the slot went minutes ago rather
- * than milliseconds ago.
  */
 export async function createBooking(
   input: BookingInput,
@@ -133,8 +119,6 @@ export async function createBooking(
     }
   }
 
-  // 24 million codes and five tries: reaching this means something is wrong
-  // with the generator, and silently failing would be worse than a 500.
   throw new Error(
     `Could not find an unused booking reference in ${REFERENCE_ATTEMPTS} attempts.`,
   );
@@ -145,7 +129,6 @@ function uniqueConflictField(error: unknown): string | null {
   if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return null;
   if (error.code !== "P2002") return null;
 
-  // Postgres reports this as the offending field names, e.g. ["slotId"].
   const target = error.meta?.target;
   return Array.isArray(target) && target.length > 0 ? String(target[0]) : null;
 }
@@ -161,7 +144,6 @@ export function selectionQuery(selection: BookingSelection): string {
   }).toString();
 }
 
-/** The step-3 URL, for "pick another time" links out of the later steps. */
 export function slotsHref(selection: BookingSelection): string {
   const { service, level, year, subject } = selection;
   return `/book/slots?${new URLSearchParams({ service, level, year, subject })}`;

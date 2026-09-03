@@ -15,11 +15,7 @@ import {
 
 /**
  * Client component only because the year/subject options depend on the chosen
- * level. Submission is a GET to /book/slots via next/form so the stepper can
- * stay mounted and animate; the resulting state still lives in the URL.
- *
- * Level, year and subject names stay in Dutch - they are the real names of the
- * Dutch school system and don't have meaningful English equivalents.
+ * level. 
  */
 export function LevelPicker({ serviceSlug }: { serviceSlug: string }) {
   const [level, setLevel] = useState<SchoolLevel | "">("");

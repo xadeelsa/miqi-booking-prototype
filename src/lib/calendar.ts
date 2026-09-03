@@ -3,7 +3,7 @@ import { SCHOOL_LEVEL_LABELS, type SchoolLevel } from "./catalog";
 /**
  * Calendar hand-off for a confirmed booking, in the two forms that between
  * them cover everyone: a Google Calendar template URL, and an .ics file for
- * Apple Calendar, Outlook and anything else that speaks RFC 5545.
+ * Apple Calendar, Outlook and anything else.
  *
  * Both are built from the stored Booking, and both emit times in UTC. Slot
  * times are stored as instants, so UTC is exact - and it sidesteps having to

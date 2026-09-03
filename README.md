@@ -10,7 +10,7 @@ How it's put together: [ARCHITECTURE.md](./ARCHITECTURE.md). How I used AI: [AI.
 
 ## Setup
 
-You need **Node 22** and **Postgres** (CI uses 16).
+You need **Node 22** and **Postgres**. That's what CI runs, on Postgres 16.
 
 ### Database
 
@@ -64,14 +64,18 @@ The seed can be run more than once. It adds three services (Bijles 1-op-1, Huisw
 npm test
 ```
 
-Tests use the same `DATABASE_URL`. Fixture rows sit in 2098 so they don't collide with the seed. CI runs lint, typecheck and tests against a fresh Postgres on every push.
+Four files: the validation boundary, what counts as a bookable slot, the double-booking guarantee, and one booking walked from query string to admin list.
+
+They use the same `DATABASE_URL` as the app, which on your machine is probably the database you've been clicking through by hand. Fixtures keep out of the way by living in windows the seed never touches: slots beyond 2098, history before 2000, and service slugs with a reserved prefix. They're cleared before each test rather than after, so a run that dies half way through can't poison the next one.
+
+CI runs lint, typecheck and the suite against a fresh Postgres on every push and pull request.
 
 ## Scripts
 
 | Script | Purpose |
 |---|---|
 | `npm run dev` | Dev server |
-| `npm test` | Concurrency tests (needs Postgres) |
+| `npm test` | Full test suite (needs Postgres) |
 | `npm run db:migrate` | Apply migrations (dev) |
 | `npm run db:deploy` | Apply migrations (CI / production) |
 | `npm run db:seed` | Seed services, slots and example bookings |
@@ -91,7 +95,7 @@ I kept this as **one Next.js app** instead of Laravel with a separate frontend, 
 
 **Most of the funnel is in the query string** (service, level, year, subject, slot). Refreshing a step works, and the pages stay server-rendered. Names, email and phone go in an httpOnly cookie instead, putting those in the URL would leak them into history, `Referer` headers and logs. Zod checks everything that hits the server, including values the dropdowns offered.
 
-**Tests run against real Postgres.** The thing we're proving is a unique constraint. Mocking Prisma would only prove the mock.
+**Tests run against real Postgres.** The thing we're proving is a unique constraint. Mocking Prisma would only prove the mock. Green tests aren't proof either, so the ones that matter were checked by breaking the code on purpose and making sure they went red.
 
 The UI is Tailwind. Payment is a fake charge with Mollie/Stripe in mind (iDEAL, given a Dutch customer base). Email is shaped like Resend's `emails.send`, so replacing the mock should be an import and an API key, not a rewrite.
 
@@ -105,7 +109,7 @@ This is a prototype, and it shows:
 - No login, no cancel or reschedule. Anyone with the confirmation URL can see the booking. `/admin` lists every booking, including parent contact details, and is not gated.
 - `PENDING` and `FAILED` payment statuses exist on the model but nothing writes them. We only insert `PAID`. Failed attempts would need their own table so they don't occupy a slot.
 - Contact details live in a 30-minute cookie until pay. If it's gone or looks wrong, we send you back to the form.
-- Tests cover the concurrency case. They don't walk the whole funnel.
+- The tests stop at the server. Validation, availability, the concurrency guarantee and a whole booking are covered, but nothing drives a browser, so clicking, the details cookie and the redirect after payment are only ever checked by hand.
 
 ## Next steps
 
@@ -117,4 +121,4 @@ If this went further, I'd do these in roughly this order:
 4. Signed confirmation links, or a parent account, so the reference isn't the only key.
 5. Multiple tutors and real availability, so subject actually matters.
 6. A log of payment attempts that doesn't hold a slot, if we need to see failed charges.
-7. More tests: validation, availability, and one happy path through the funnel.
+7. A browser test, probably Playwright, for the parts only a browser exercises: the cookie, the redirect, the back button.

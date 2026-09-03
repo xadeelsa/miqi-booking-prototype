@@ -13,8 +13,7 @@ const INITIAL: DetailsFormState = {};
  * Client component only so the parent gets validation errors back without
  * losing what they typed. The selection travels in hidden inputs and is
  * re-validated server-side - these fields are a convenience, not a source of
- * truth. The browser's own `required`/`type` checks are a fast first pass; the
- * schema in the action is the one that decides.
+ * truth.
  */
 export function DetailsForm({
   selection,
