@@ -186,3 +186,8 @@ export function paymentHref(selection: BookingSelection): string {
 export function confirmationHref(reference: string): string {
   return `/book/confirmation/${encodeURIComponent(reference)}`;
 }
+
+/** Sits under the confirmation page so both are gated by the same reference. */
+export function icsHref(reference: string): string {
+  return `${confirmationHref(reference)}/calendar.ics`;
+}

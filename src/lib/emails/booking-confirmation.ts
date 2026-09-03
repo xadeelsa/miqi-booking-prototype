@@ -1,4 +1,6 @@
-import { SCHOOL_LEVEL_LABELS, type SchoolLevel } from "../catalog";
+import { icsHref } from "../booking";
+import { googleCalendarUrl, type CalendarBooking } from "../calendar";
+import { SCHOOL_LEVEL_LABELS } from "../catalog";
 import { EMAIL_FROM, type SendEmailRequest } from "../email";
 import { formatDateTime, formatPrice } from "../format";
 
@@ -8,20 +10,23 @@ import { formatDateTime, formatPrice } from "../format";
  * which is the snapshot taken at booking time.
  *
  * Structural type rather than Prisma's, so this stays testable without a
- * database and doesn't care which query loaded the booking.
+ * database and doesn't care which query loaded the booking. It extends the
+ * calendar's shape because the email carries the same two hand-off links.
  */
-export type ConfirmationBooking = {
-  reference: string;
+export type ConfirmationBooking = CalendarBooking & {
   parentName: string;
   parentEmail: string;
-  studentName: string;
-  schoolLevel: SchoolLevel;
-  year: string;
-  subject: string;
   priceCents: number;
-  service: { name: string };
-  slot: { startsAt: Date };
 };
+
+/**
+ * Emails can't use relative URLs. Defaults to the dev server so the logged
+ * message is clickable without any configuration.
+ */
+const APP_URL = (process.env.APP_URL ?? "http://localhost:3000").replace(
+  /\/+$/,
+  "",
+);
 
 /**
  * Names and subjects are parent-supplied, and the HTML body is assembled by
@@ -45,6 +50,8 @@ export function bookingConfirmationEmail(
   const studentName = escapeHtml(booking.studentName);
   const subject = escapeHtml(booking.subject);
   const serviceName = escapeHtml(booking.service.name);
+  const googleUrl = googleCalendarUrl(booking);
+  const icsUrl = `${APP_URL}${icsHref(booking.reference)}`;
 
   const lines = [
     `Hello ${booking.parentName},`,
@@ -56,6 +63,10 @@ export function bookingConfirmationEmail(
     `For:       ${level}, ${booking.year} — ${booking.subject}`,
     `When:      ${when}`,
     `Paid:      ${price}`,
+    "",
+    "Add it to your calendar:",
+    `  Google Calendar: ${googleUrl}`,
+    `  Apple Calendar / Outlook (.ics): ${icsUrl}`,
     "",
     "Need to change or cancel? Reply to this email with your reference.",
     "",
@@ -78,6 +89,12 @@ export function bookingConfirmationEmail(
           <tr><td style="padding:2px 16px 2px 0;color:#5f6a70">When</td><td>${when}</td></tr>
           <tr><td style="padding:2px 16px 2px 0;color:#5f6a70">Paid</td><td>${price}</td></tr>
         </table>
+        <p style="font-size:14px">
+          Add it to your calendar:
+          <a href="${escapeHtml(googleUrl)}">Google Calendar</a>
+          &middot;
+          <a href="${escapeHtml(icsUrl)}">Apple Calendar / Outlook (.ics)</a>
+        </p>
         <p style="color:#5f6a70;font-size:14px">
           Need to change or cancel? Reply to this email with your reference.
         </p>

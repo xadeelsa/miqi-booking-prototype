@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import { buttonClass } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Note } from "@/components/ui/Note";
+import { icsHref } from "@/lib/booking";
+import { googleCalendarUrl } from "@/lib/calendar";
 import { SCHOOL_LEVEL_LABELS } from "@/lib/catalog";
 import { formatDateTime, formatPrice } from "@/lib/format";
 import { getBookingByReference } from "@/lib/queries";
@@ -84,6 +86,31 @@ export default async function ConfirmationPage({
           />
         </dl>
       </Card>
+
+      <section className="mt-6">
+        <h2 className="text-sm font-semibold tracking-tight">
+          Add it to your calendar
+        </h2>
+        <div className="mt-3 flex flex-wrap gap-3">
+          {/* Both leave the app, so neither is a <Link>: the Google URL is
+              external, and the .ics is a download rather than a navigation. */}
+          <a
+            href={googleCalendarUrl(booking)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonClass("secondary")}
+          >
+            Add to Google Calendar
+          </a>
+          <a
+            href={icsHref(booking.reference)}
+            download={`${booking.reference}.ics`}
+            className={buttonClass("secondary")}
+          >
+            Download .ics (Apple Calendar, Outlook)
+          </a>
+        </div>
+      </section>
 
       <Note className="mt-6">
         This is a prototype: no money has moved and no email has actually been
