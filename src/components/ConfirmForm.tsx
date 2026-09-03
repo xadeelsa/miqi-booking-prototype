@@ -15,6 +15,22 @@ export function ConfirmForm({
 }) {
   const [state, formAction, pending] = useActionState(action, INITIAL);
 
+  // Once the slot is booked there is nothing left to submit — offering the
+  // button again would only earn the parent a "someone else booked that time"
+  // about their own booking.
+  if (state.booked) {
+    return (
+      <Note className="mt-6 text-ink">
+        Booked. Your reference is{" "}
+        <strong className="font-semibold tracking-wide">
+          {state.booked.reference}
+        </strong>
+        , and {formatPrice(state.booked.priceCents)} has been charged. A
+        confirmation page and email follow in a later step.
+      </Note>
+    );
+  }
+
   return (
     <form action={formAction} className="mt-6">
       {state.error && (
@@ -23,15 +39,8 @@ export function ConfirmForm({
         </p>
       )}
 
-      {state.ready && (
-        <Note className="mb-4">
-          Checked — this time is still free and {formatPrice(state.ready.priceCents)}{" "}
-          is due. Payment isn&apos;t connected yet.
-        </Note>
-      )}
-
       <Button type="submit" disabled={pending}>
-        {pending ? "Checking…" : "Continue to payment"}
+        {pending ? "Booking…" : "Confirm booking"}
       </Button>
     </form>
   );

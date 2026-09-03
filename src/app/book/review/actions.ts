@@ -1,13 +1,12 @@
 "use server";
 
-import { loadBookingContext, UNAVAILABLE_MESSAGES } from "@/lib/booking";
+import { createBooking, UNAVAILABLE_MESSAGES } from "@/lib/booking";
 import { readDetailsDraft } from "@/lib/draft";
 import { bookingInputSchema, type BookingSelection } from "@/lib/validation";
 
 export type ConfirmState = {
   error?: string;
-  /** Set once the whole booking has cleared the server boundary. */
-  ready?: { priceCents: number };
+  booked?: { reference: string; priceCents: number };
 };
 
 /**
@@ -39,13 +38,16 @@ export async function confirmBooking(
     };
   }
 
-  // Priced and re-checked here rather than trusting the page that rendered the
-  // summary, so a slot taken while the parent was reading is caught now.
-  const context = await loadBookingContext(input.data);
-  if (!context.ok) return { error: UNAVAILABLE_MESSAGES[context.reason] };
+  // M5 inserts the simulated payment step here. Create-on-pay means the row
+  // is written only once money has moved, so until payment exists confirming
+  // books directly.
+  const result = await createBooking(input.data);
 
-  // M4 writes the Booking from here: created on successful payment, with the
-  // slotId unique constraint deciding the winner if two parents confirm the
-  // same slot at once.
-  return { ready: { priceCents: context.priceCents } };
+  // "taken" is the expected answer when two parents confirm the same slot at
+  // once, so it reads as an ordinary message rather than a failure.
+  if (!result.ok) return { error: UNAVAILABLE_MESSAGES[result.reason] };
+
+  return {
+    booked: { reference: result.reference, priceCents: result.priceCents },
+  };
 }
