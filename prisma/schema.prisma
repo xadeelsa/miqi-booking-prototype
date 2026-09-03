@@ -1,0 +1,94 @@
+// MIQI Booking — Prisma schema
+//
+// Design notes (see README > Architecture):
+//  - Service and Slot are seeded reference data.
+//  - Slots are a single tutor/resource's static availability (one calendar).
+//  - schoolLevel/year/subject are CAPTURED fields on a booking, not join tables
+//    — they don't drive availability, they're just recorded. Their option lists
+//    live in src/lib/catalog.ts (validated by Zod), not in the database.
+//  - Booking.slotId is UNIQUE — this single constraint is the entire
+//    anti-double-booking guarantee. The database structurally cannot hold two
+//    bookings for the same slot.
+//  - Booking.priceCents is copied from the Service at booking time, so a later
+//    price change never rewrites historical bookings.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SchoolLevel {
+  BASISSCHOOL
+  VMBO
+  HAVO
+  VWO
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
+model Service {
+  id          Int       @id @default(autoincrement())
+  slug        String    @unique
+  name        String
+  description String
+  priceCents  Int
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  bookings    Booking[]
+
+  @@map("services")
+}
+
+model Slot {
+  id        Int      @id @default(autoincrement())
+  startsAt  DateTime @unique
+  endsAt    DateTime
+  createdAt DateTime @default(now())
+
+  booking   Booking?
+
+  @@index([startsAt])
+  @@map("slots")
+}
+
+model Booking {
+  id            Int           @id @default(autoincrement())
+  reference     String        @unique
+
+  // The hero: one booking per slot, enforced by the database.
+  slotId        Int           @unique
+  slot          Slot          @relation(fields: [slotId], references: [id])
+
+  serviceId     Int
+  service       Service       @relation(fields: [serviceId], references: [id])
+
+  // Captured selection (validated against src/lib/catalog.ts).
+  schoolLevel   SchoolLevel
+  year          String
+  subject       String
+
+  // Contact details.
+  parentName    String
+  parentEmail   String
+  parentPhone   String?
+  studentName   String
+
+  // Price snapshot + payment state.
+  priceCents    Int
+  paymentStatus PaymentStatus @default(PENDING)
+
+  createdAt     DateTime      @default(now())
+
+  @@index([serviceId])
+  @@index([createdAt])
+  @@map("bookings")
+}
